@@ -1,0 +1,54 @@
+// Firebase Console > Firestore Database > Rules এ বসিয়ে Publish করুন
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "sonalifashionbarishal@gmail.com";
+    }
+
+    // কাউন্টার বাড়ানো শুধু তখনই চলবে যখন একই batch-এ এই কুপনসহ নতুন অর্ডার তৈরি হচ্ছে
+    function orderUsesCoupon(code) {
+      let oid = request.resource.data.orderId;
+      let p = /databases/$(database)/documents/orders/$(oid);
+      return existsAfter(p) && !exists(p)
+        && code in getAfter(p).data.couponCodes;
+    }
+
+    match /products/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /events/{doc}   { allow read: if isAdmin(); allow create: if true; }
+
+    // অর্ডারে নাম/ফোন/ঠিকানা থাকে: লিস্ট শুধু অ্যাডমিন, ট্র্যাকিংয়ের জন্য ID দিয়ে get পাবলিক
+    match /orders/{doc} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    match /couponUsage/{code} {
+      allow read: if true;
+      allow create: if isAdmin()
+        || (request.resource.data.count == 1 && orderUsesCoupon(code));
+      allow update: if isAdmin()
+        || (request.resource.data.count == resource.data.count + 1
+            && orderUsesCoupon(code));
+      allow delete: if isAdmin();
+    }
+
+    match /coupons/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /reviews/{doc} {
+      allow read: if true; allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+    match /likes/{doc} {
+      allow read: if true; allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+    match /siteLikes/{doc} {
+      allow read: if true; allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+  }
+}

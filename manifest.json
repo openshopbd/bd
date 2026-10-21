@@ -1,0 +1,16 @@
+{
+  "name": "openshop.bd",
+  "short_name": "openshop.bd",
+  "description": "আপনার পছন্দের সবকিছু, এক জায়গায় — Openshop",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF3E2",
+  "theme_color": "#1B2547",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
