@@ -1,0 +1,3814 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Admin | openshop.bd</title>
+<meta name="apple-mobile-web-app-title" content="OS Admin">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:wght@400;700&family=Hind+Siliguri:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;600;700&family=Baloo+Da+2:wght@500;700&family=Atma:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#1B2547">
+<link rel="apple-touch-icon" href="images/icon-192.png">
+<style>
+  /* ============ Design tokens ============
+     Openshop Admin — "ledger & ticket" system: a calm navy workspace
+     with a warm gold accent, built for fast one-thumb catalog/order work.
+  */
+  :root{
+    --navy:#1B2547; --navy-deep:#11172E; --navy-soft:#2E3B6B;
+    --gold:#C89B3C; --gold-deep:#A87F2B; --gold-soft:#F6ECD3;
+    --paper:#F4F3EF; --surface:#FFFFFF; --surface-2:#FBFAF7;
+    --ink:#1C1D26; --ink-soft:#666A78; --ink-faint:#9498A3;
+    --line:#E7E4DC; --line-soft:#EFEDE6;
+    --success:#1E8A5F; --success-soft:#E3F6ED; --success-line:#BEE3D2;
+    --danger:#C0392B; --danger-soft:#FBEAE8;
+    --maroon:var(--navy); --rose:var(--gold-soft); --cream:var(--paper); --green:var(--success);
+    --radius-lg:16px; --radius-md:12px; --radius-sm:8px;
+    --shadow-card:0 1px 2px rgba(20,20,30,.04), 0 10px 28px -14px rgba(20,20,30,.16);
+    --shadow-pop:0 20px 48px -16px rgba(17,23,46,.35);
+    --font-display:'Tiro Bangla',serif; --font-body:'Hind Siliguri',sans-serif; --font-num:'Baloo Da 2','Hind Siliguri',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  ::selection{background:var(--gold-soft); color:var(--navy-deep);}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); -webkit-tap-highlight-color:transparent;}
+  .wrap{max-width:980px; margin:0 auto; padding:20px 16px 70px;}
+  h1{font-family:var(--font-display); color:var(--navy); font-size:21px; letter-spacing:.2px;}
+  h2{font-family:var(--font-display); color:var(--navy); font-size:16.5px; margin:0 0 14px;}
+  a{color:var(--navy);}
+  ::-webkit-scrollbar{height:6px; width:6px;}
+  ::-webkit-scrollbar-thumb{background:#d8d4c8; border-radius:99px;}
+
+  /* buttons */
+  .btn{background:var(--navy); color:#fff; border:none; padding:11px 22px; border-radius:999px; font-weight:600;
+    cursor:pointer; font-family:var(--font-body); font-size:14px; letter-spacing:.2px; transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    box-shadow:0 6px 16px -6px rgba(27,37,71,.55);}
+  .btn:hover{opacity:.94; transform:translateY(-1px);}
+  .btn:active{transform:translateY(0); opacity:1;}
+  .btn:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn-outline{background:var(--surface); border:1.5px solid var(--line); color:var(--navy); box-shadow:none; font-weight:600;}
+  .btn-outline:hover{border-color:var(--navy); background:var(--surface-2);}
+  .btn-gold{background:var(--gold); color:var(--navy-deep); box-shadow:0 6px 16px -6px rgba(200,155,60,.55);}
+  button{outline-offset:2px;}
+  :focus-visible{outline:2.5px solid var(--gold-deep); outline-offset:2px;}
+
+  /* forms */
+  label{display:block; font-weight:600; font-size:12.5px; color:var(--ink-soft); margin:14px 0 5px; text-transform:uppercase; letter-spacing:.3px;}
+  input, textarea, select{width:100%; padding:10px 13px; border-radius:var(--radius-sm); border:1.5px solid var(--line);
+    font-family:var(--font-body); font-size:14.5px; background:var(--surface); color:var(--ink); transition:border-color .15s ease, box-shadow .15s ease;}
+  input:focus, textarea:focus, select:focus{outline:none; border-color:var(--navy-soft); box-shadow:0 0 0 3px rgba(46,59,107,.14);}
+  textarea{min-height:80px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:520px){ .row2{grid-template-columns:1fr;} }
+
+  /* card */
+  .card{background:var(--surface); border-radius:var(--radius-lg); padding:22px; box-shadow:var(--shadow-card); margin-bottom:18px; border:1px solid var(--line-soft);}
+
+  /* product rows */
+  .product-list{display:grid; gap:10px;}
+  .product-row{display:flex; gap:12px; align-items:center; border:1.5px solid var(--line-soft); background:var(--surface-2); border-radius:var(--radius-md); padding:10px; user-select:none; transition:border-color .15s ease, background .15s ease;}
+  .product-row.selected{border-color:var(--success); background:var(--success-soft);}
+  .row-select-check{width:18px; height:18px; flex:none; cursor:pointer; accent-color:var(--navy);}
+  .row-select-check.hidden{display:none;}
+  .bulk-action-bar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    background:var(--success-soft); border:1.5px solid var(--success); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;
+  }
+  .bulk-action-bar.hidden{display:none;}
+  .bulk-action-bar select{padding:8px 10px; border-radius:var(--radius-sm); border:1.5px solid var(--success-line); width:auto;}
+  .product-row img{width:52px; height:65px; object-fit:cover; border-radius:8px; background:var(--line-soft);}
+  .product-row .info{flex:1; font-size:13px; color:var(--ink-soft);}
+  .product-row .info b{font-size:14px; color:var(--ink);}
+  .row-actions{display:flex; gap:8px;}
+  .row-actions button{padding:7px 13px; font-size:12px; font-weight:600; border-radius:999px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; transition:all .15s ease;}
+  .row-actions button:hover{border-color:var(--navy); color:var(--navy);}
+
+  .msg{font-size:13px; margin-top:10px;}
+  .msg.error{color:var(--danger);}
+  .msg.ok{color:var(--success);}
+  #loginScreen{text-align:center; padding:64px 20px; max-width:400px; margin:40px auto 0;}
+  #loginScreen img{width:68px; height:68px; border-radius:20px; margin-bottom:16px; box-shadow:var(--shadow-card);}
+  #loginScreen h1{font-size:20px;}
+  #loginScreen p{color:var(--ink-soft); font-size:14px; line-height:1.6;}
+  .hidden{display:none !important;}
+
+  /* header */
+  .top-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; flex-wrap:wrap;}
+  .top-row h1{display:flex; align-items:center; gap:8px;}
+  small.hint{color:var(--ink-faint); display:block; margin-top:5px; font-size:12px; line-height:1.5;}
+
+  /* tabs — "ticket stub" nav */
+  .tabs{display:flex; gap:6px; overflow-x:auto; margin-bottom:18px; padding:6px; background:var(--surface); border-radius:999px; box-shadow:var(--shadow-card); position:sticky; top:8px; z-index:40; border:1px solid var(--line-soft);}
+  .tab-btn{
+    flex:0 0 auto; padding:9px 16px; border-radius:999px; border:none; position:relative;
+    background:transparent; color:var(--ink-soft); font-weight:600; font-size:13px; cursor:pointer; font-family:var(--font-body); transition:color .15s ease, background .15s ease;
+  }
+  .tab-btn:hover{color:var(--navy); background:var(--surface-2);}
+  .tab-btn.active{background:var(--navy); color:#fff;}
+  .tab-btn.active::after{content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:var(--gold);}
+  .ctab-btn{
+    flex:0 0 auto; padding:7px 14px; border-radius:999px; border:1.5px solid var(--line);
+    background:var(--surface); color:var(--navy); font-weight:600; font-size:12.5px; cursor:pointer; font-family:var(--font-body); transition:all .15s ease;
+  }
+  .ctab-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+  /* stats */
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;}
+  .stat-box{background:var(--surface); border-radius:var(--radius-lg); padding:18px 16px; box-shadow:var(--shadow-card); text-align:left; border:1px solid var(--line-soft); border-left:4px solid var(--gold);}
+  .stat-box .num{font-family:var(--font-num); font-size:27px; color:var(--navy); font-weight:700; line-height:1;}
+  .stat-box .lbl{font-size:12px; color:var(--ink-soft); margin-top:6px; font-weight:600;}
+  .rank-row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line-soft); font-size:13px;}
+  .rank-row:last-child{border-bottom:none;}
+  .lead-card{border:1.5px solid var(--line-soft); background:var(--surface-2); border-radius:var(--radius-md); padding:12px; margin-bottom:10px; font-size:13px;}
+  .lead-card b{font-size:14px; color:var(--navy);}
+  .lead-card .items{color:var(--ink-soft); margin-top:6px; font-size:12px;}
+  .settings-preview{width:100%; max-height:140px; object-fit:cover; border-radius:var(--radius-sm); margin-top:8px; display:none; border:1px solid var(--line);}
+
+  /* image thumbs */
+  .img-thumb-grid{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .img-thumb{position:relative; width:78px; height:98px;}
+  .img-thumb img{width:100%; height:100%; object-fit:cover; border-radius:var(--radius-sm); border:1.5px solid var(--line);}
+  .img-thumb .rmBtn{
+    position:absolute; top:-7px; right:-7px; width:22px; height:22px; border-radius:50%;
+    background:var(--danger); color:#fff; border:2px solid #fff; font-size:13px; line-height:1; cursor:pointer; padding:0; box-shadow:0 2px 6px rgba(0,0,0,.2);
+  }
+  .img-thumb .cover-tag{position:absolute; bottom:2px; left:2px; right:2px; background:rgba(30,138,95,.9); color:#fff; font-size:9px; text-align:center; border-radius:4px; padding:1px 0; font-weight:600;}
+  .img-thumb .editBtn{
+    position:absolute; top:-7px; left:-7px; width:22px; height:22px; border-radius:50%;
+    background:var(--navy); color:#fff; border:2px solid #fff; font-size:11px; line-height:1; cursor:pointer; padding:0; box-shadow:0 2px 6px rgba(0,0,0,.2);
+  }
+
+  #adminToastHost{position:fixed; top:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:10px; max-width:340px; max-height:90vh; overflow-y:auto;}
+  .admin-order-toast{
+    position:relative; background:var(--surface); border:1px solid var(--line); border-left:5px solid var(--success); border-radius:var(--radius-md);
+    box-shadow:var(--shadow-pop); padding:12px 30px 12px 14px; display:flex; gap:10px; align-items:flex-start;
+    cursor:pointer; animation:aot-in .25s ease;
+  }
+  .admin-order-toast .aot-icon{font-size:22px;}
+  .admin-order-toast .aot-body b{display:block; font-size:13.5px; margin-bottom:4px;}
+  .admin-order-toast .aot-body div{font-size:12px; color:var(--ink-soft); margin-top:2px; line-height:1.4;}
+  .admin-order-toast .aot-close{
+    position:absolute; top:8px; right:8px; border:none; background:none; font-size:18px; line-height:1;
+    color:var(--ink-faint); cursor:pointer; padding:2px 6px;
+  }
+  @keyframes aot-in{ from{ transform:translateX(20px); opacity:0; } to{ transform:translateX(0); opacity:1; } }
+
+  .order-detail-card{padding:14px;}
+  .order-customer-info{display:flex; flex-wrap:wrap; gap:4px 14px; font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;}
+  .order-customer-info a{color:inherit; text-decoration:none;}
+  .order-items-block{border-top:1px dashed var(--line); border-bottom:1px dashed var(--line); padding:8px 0; margin-bottom:8px;}
+  .order-item-row{display:flex; gap:10px; align-items:center; padding:5px 0;}
+  .order-item-row img{width:40px; height:40px; object-fit:cover; border-radius:6px; background:var(--line-soft); flex:none;}
+  .order-item-info .oi-name{font-size:13px; font-weight:600;}
+  .order-item-info .oi-size{font-weight:400; color:var(--ink-soft);}
+  .order-item-info .oi-meta{font-size:12px; color:var(--ink-soft); margin-top:1px;}
+  .order-total-row{text-align:right; font-size:13.5px; color:var(--ink);}
+
+  /* ============ Pro image editor ============ */
+  #imgEditorModal{position:fixed; inset:0; background:rgba(11,15,28,.72); backdrop-filter:blur(2px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:0;}
+  #imgEditorModal .editorBox{
+    background:var(--surface-2); border-radius:0; padding:0; width:100%; height:100%; max-width:none; max-height:none;
+    display:flex; flex-direction:column; overflow:hidden; font-family:var(--font-body);
+  }
+  .ed-topbar{display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--navy-deep); color:#fff; flex:none;}
+  .ed-topbar h3{margin:0; font-size:14px; font-weight:600; flex:1; font-family:var(--font-body); opacity:.9;}
+  .ed-iconbtn{width:36px; height:36px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease;}
+  .ed-iconbtn:hover{background:rgba(255,255,255,.18);}
+  .ed-iconbtn:disabled{opacity:.35; cursor:not-allowed;}
+  .ed-body{flex:1; display:flex; flex-direction:column; min-height:0;}
+  .ed-canvas-area{flex:1; min-height:0; background:
+      linear-gradient(45deg,#e4e2da 25%,transparent 25%) -10px 0/20px 20px,
+      linear-gradient(-45deg,#e4e2da 25%,transparent 25%) -10px 0/20px 20px,
+      linear-gradient(45deg,transparent 75%,#e4e2da 75%) -10px 0/20px 20px,
+      linear-gradient(-45deg,transparent 75%,#e4e2da 75%) -10px 0/20px 20px, #f1efe9;
+    display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; touch-action:none;}
+  .ed-canvas-area canvas{outline:none;}
+  .ed-tools{flex:none; display:flex; gap:4px; overflow-x:auto; padding:8px 10px; background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .ed-tool{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:3px; border:none; background:transparent; padding:7px 12px; border-radius:12px; cursor:pointer; color:var(--ink-soft); font-family:var(--font-body); font-size:10.5px; font-weight:600; transition:all .15s ease;}
+  .ed-tool span.ico{font-size:19px;}
+  .ed-tool:hover{background:var(--surface-2); color:var(--navy);}
+  .ed-tool.active{background:var(--gold-soft); color:var(--gold-deep);}
+  .ed-panel{flex:none; max-height:40vh; overflow-y:auto; padding:14px 16px 18px; background:var(--surface);}
+  .ed-panel.hidden{display:none;}
+  .ed-row{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .ed-row:last-child{margin-bottom:0;}
+  .ed-row label{margin:0; flex:none; width:108px; font-size:11.5px;}
+  .ed-row input[type=range]{flex:1; accent-color:var(--navy);}
+  .ed-row .ed-val{width:42px; text-align:right; font-size:12px; color:var(--ink-soft); font-weight:600;}
+  .ed-filters{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px;}
+  .ed-filter-chip{flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1.5px solid var(--line); background:var(--surface); font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer;}
+  .ed-filter-chip.active{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .ed-actionbar{flex:none; display:flex; gap:10px; padding:12px 14px; background:var(--surface); border-top:1px solid var(--line);}
+  .ed-actionbar .btn, .ed-actionbar .btn-outline{flex:1; padding:12px; margin:0;}
+  .ed-emoji-grid{display:flex; flex-wrap:wrap; gap:6px;}
+  .emojiPick{
+    font-size:19px; width:38px; height:38px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); cursor:pointer;
+  }
+  .emojiPick:active{background:var(--gold-soft);}
+  .ed-crop-toolbar{display:flex; gap:8px; align-items:center; padding:10px 14px; background:var(--gold-soft); border-top:1px solid var(--line); flex-wrap:wrap;}
+  .ed-crop-toolbar span{font-size:12px; color:var(--gold-deep); font-weight:600; flex:1;}
+  .ed-crop-ratio{padding:6px 12px; border-radius:999px; border:1.5px solid rgba(168,127,43,.35); background:#fff; font-size:11.5px; font-weight:600; color:var(--gold-deep); cursor:pointer;}
+  .ed-crop-ratio.active{background:var(--gold-deep); color:#fff; border-color:var(--gold-deep);}
+</style>
+</head>
+<body>
+
+<div id="adminToastHost"></div>
+
+<div class="wrap">
+  <div id="loginScreen" class="card">
+    <img src="images/logo.png" alt="logo">
+    <h1>Openshop — Admin Panel</h1>
+    <p>শুধুমাত্র অনুমোদিত Gmail দিয়ে লগইন করে সাইট ম্যানেজ করতে পারবেন।</p>
+    <button class="btn" id="loginBtn">🔑 Google দিয়ে লগইন করুন</button>
+    <p class="msg error" id="loginMsg"></p>
+    <p class="msg" id="configWarning"></p>
+  </div>
+
+  <div id="adminScreen" class="hidden">
+    <div class="top-row">
+      <h1 style="margin:0;"><img src="images/logo.png" alt="" style="width:30px; height:30px; border-radius:9px; object-fit:cover;">এডমিন ড্যাশবোর্ড</h1>
+      <div style="display:flex; gap:8px;">
+        <a class="btn btn-outline" href="index.html" target="_blank" rel="noopener">🌐 লাইভ সাইট দেখুন</a>
+        <button class="btn btn-outline" id="logoutBtn">লগআউট</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="analytics">📊 অ্যানালিটিক্স</button>
+      <button class="tab-btn" data-tab="products">🛍️ প্রোডাক্ট</button>
+      <button class="tab-btn" data-tab="coupons">🏷️ কুপন ও অফার</button>
+      <button class="tab-btn" data-tab="orders">📦 অর্ডার ও ট্র্যাকিং</button>
+      <button class="tab-btn" data-tab="settings">🎨 সাইট সেটিংস</button>
+      <button class="tab-btn" data-tab="leads">👤 গ্রাহক তালিকা</button>
+      <button class="tab-btn" data-tab="reviews">⭐ রিভিউ</button>
+      <button class="tab-btn" data-tab="location">📍 লোকেশন</button>
+    </div>
+
+    <!-- ================= ANALYTICS TAB ================= -->
+    <div class="tab-panel" id="tab-analytics">
+      <div class="stat-grid">
+        <div class="stat-box"><div class="num" id="statTodayViews">0</div><div class="lbl">আজকে ভিজিট</div></div>
+        <div class="stat-box"><div class="num" id="statTotalViews">0</div><div class="lbl">সর্বমোট ভিজিট</div></div>
+        <div class="stat-box"><div class="num" id="statTotalProductViews">0</div><div class="lbl">প্রোডাক্ট দেখা হয়েছে</div></div>
+        <div class="stat-box"><div class="num" id="statTotalLeads">0</div><div class="lbl">মোট গ্রাহক</div></div>
+      </div>
+      <div class="card">
+        <h2>🔥 সবচেয়ে বেশি দেখা প্রোডাক্ট</h2>
+        <div id="topProducts"><p class="msg">লোড হচ্ছে...</p></div>
+      </div>
+      <div class="card">
+        <h2>⚠️ স্টক কম / শেষ হয়ে যাওয়া প্রোডাক্ট</h2>
+        <div id="lowStockList"><p class="msg">লোড হচ্ছে...</p></div>
+      </div>
+      <div class="card">
+        <p style="font-size:13px; color:var(--ink-soft); margin:0;">
+          বিস্তারিত ভিজিটর রিপোর্ট (কোন শহর/দেশ থেকে আসছে, মোবাইল না পিসি) দেখতে
+          <a href="https://analytics.google.com" target="_blank" style="color:var(--maroon); font-weight:600;">Google Analytics</a> ব্যবহার করুন —
+          এটা এই ওয়েবসাইটে আগে থেকেই যুক্ত করা আছে।
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= PRODUCTS TAB ================= -->
+    <div class="tab-panel hidden" id="tab-products">
+      <div class="card">
+        <h2 id="formTitle">নতুন প্রোডাক্ট যোগ করুন</h2>
+        <form id="productForm">
+          <input type="hidden" id="editId">
+          <label>প্রোডাক্টের নাম</label>
+          <input type="text" id="fName" required>
+          <div class="row2">
+            <div>
+              <label>মেইন ক্যাটাগরি (সাইট সেটিংস ট্যাব থেকে এডিট করা যায়)</label>
+              <select id="fMainCategory" required>
+                <option value="">-- বাছাই করুন --</option>
+              </select>
+            </div>
+            <div>
+              <label>সাব-ক্যাটাগরি</label>
+              <input type="text" id="fCategory" placeholder="যেমন: শাড়ি, টি-শার্ট, হ্যান্ডব্যাগ, শীতের পোশাক" required>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>ভ্যারিয়েন্ট (কমা দিয়ে আলাদা করুন — রং, সাইজ, মডেল যা প্রযোজ্য)</label>
+              <input type="text" id="fSizes" placeholder="ফ্রি সাইজ, অথবা লাল-নীল-সবুজ, অথবা 128GB-256GB">
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>বিক্রয় মূল্য (৳)</label>
+              <input type="number" id="fPrice" required>
+            </div>
+            <div>
+              <label>পুরাতন মূল্য (ঐচ্ছিক, ছাড় দেখাতে)</label>
+              <input type="number" id="fOldPrice">
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>স্টকে কতটি আছে (ঐচ্ছিক)</label>
+              <input type="number" id="fStock" min="0" placeholder="খালি রাখলে সবসময় স্টকে আছে ধরা হবে">
+              <small class="hint">০ লিখলে ওয়েবসাইটে "স্টকে নেই" দেখাবে এবং কার্টে যোগ করা যাবে না।</small>
+            </div>
+            <div>
+              <label>ক্রয়মূল্য (৳, ঐচ্ছিক)</label>
+              <input type="number" id="fCostPrice" min="0" placeholder="আপনি কত দিয়ে কিনেছেন">
+              <small class="hint">এটা কাস্টমারকে দেখানো হয় না — শুধু "স্মার্ট কুপন সাজেশন" ফিচার এটা দিয়ে হিসাব করে কোন ছাড়ে লস হবে না।</small>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>ব্র্যান্ড (ঐচ্ছিক)</label>
+              <input type="text" id="fBrand" placeholder="যেমন: Walton, Nike, নিজস্ব ব্র্যান্ড হলে খালি রাখুন">
+            </div>
+            <div>
+              <label>ডেলিভারি</label>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <input type="checkbox" id="fFreeDelivery" style="width:auto;">
+                <label for="fFreeDelivery" style="display:inline; font-weight:400;">এই প্রোডাক্টে ফ্রি ডেলিভারি</label>
+              </div>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>⚡ ফ্ল্যাশ সেল</label>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <input type="checkbox" id="fFlash" style="width:auto;">
+                <label for="fFlash" style="display:inline; font-weight:400;">এই প্রোডাক্ট ফ্ল্যাশ সেলে রাখুন</label>
+              </div>
+            </div>
+            <div>
+              <label>ফ্ল্যাশ সেল দাম (৳)</label>
+              <input type="number" id="fFlashPrice" min="0" placeholder="সেল চলাকালীন এই দামে বিক্রি হবে">
+            </div>
+          </div>
+          <label>ছবি ও ভিডিও (একসাথে একাধিক ছবি + ১টা ভিডিও বাছাই করা যাবে)</label>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline" id="pickImageBtn">📷🎬 ছবি / ভিডিও আপলোড করুন</button>
+            <input type="file" id="fImageFile" accept="image/*,video/*" multiple class="hidden">
+            <span id="uploadStatus" style="font-size:13px; color:var(--ink-soft);"></span>
+          </div>
+          <div class="img-thumb-grid hidden" id="imageThumbGrid"></div>
+          <input type="text" id="fImage" placeholder="https://... (ঐচ্ছিক — নিজে থেকে একটা ছবির লিংক পেস্ট করতে চাইলে)" style="margin-top:10px;">
+          <small class="hint">উপরের বাটনে ট্যাপ করে গ্যালারি থেকে একসাথে একাধিক ছবি বাছুন — সবগুলো অটো আপলোড হয়ে যাবে। প্রথম ছবিটি প্রোডাক্টের প্রধান (কভার) ছবি হিসেবে দেখানো হবে। প্রতিটা থাম্বনেইলের 🖌️ বাটনে ট্যাপ করে ছবিতে টেক্সট/ইমোজি বসানো ও ফিল্টার দেওয়া যাবে, আর × বাটনে ছবিটা বাদ দেওয়া যাবে।</small>
+          <div style="margin-top:6px;"><span id="videoUploadStatus" style="font-size:13px; color:var(--ink-soft);"></span></div>
+          <div id="videoUploadDetails" class="hidden" style="margin-top:8px;padding:10px;border:1px solid var(--line, #ddd);border-radius:10px;font-size:13px;overflow-wrap:anywhere;">
+            <div><strong>ভিডিও কোথায় আপলোড হয়েছে:</strong> <span id="videoHostLabel">চিহ্নিত করা যায়নি</span></div>
+            <div style="margin-top:5px;"><strong>ভিডিও URL:</strong> <a id="videoResultLink" href="#" target="_blank" rel="noopener noreferrer">লিংক খুলুন</a></div>
+            <button type="button" class="btn btn-outline" id="copyVideoUrlBtn" style="margin-top:8px;padding:6px 10px;font-size:12px;">লিংক কপি করুন</button>
+          </div>
+          <div id="videoPreviewBox" class="hidden" style="margin-top:10px; position:relative; max-width:320px;">
+            <video id="videoPreview" controls playsinline preload="metadata" style="width:100%; border-radius:12px; background:#000;"></video>
+            <button type="button" id="videoRemoveBtn" title="ভিডিও বাদ দিন" style="position:absolute; top:6px; right:6px; width:28px; height:28px; border:none; border-radius:50%; background:rgba(0,0,0,.65); color:#fff; font-size:18px; line-height:1; cursor:pointer;">×</button>
+          </div>
+          <input type="text" id="fVideoUrl" placeholder="https://... (ঐচ্ছিক — নিজে থেকে ভিডিওর লিংক পেস্ট করতে চাইলে)" style="margin-top:10px;">
+          <small class="hint">ভিডিও Catbox.moe-তে ফ্রি আপলোড হয় (সর্বোচ্চ ১০০ MB, MP4 সবচেয়ে ভালো)। আপলোড শেষ হলে প্রোডাক্ট সেভ করুন — কাস্টমার প্রোডাক্ট পেজে ভিডিও দেখতে পাবে।</small>
+          <label>বিবরণ</label>
+          <textarea id="fDesc"></textarea>
+          <div style="margin-top:16px; display:flex; gap:10px;">
+            <button type="submit" class="btn" id="saveBtn">সেভ করুন</button>
+            <button type="button" class="btn btn-outline hidden" id="cancelEditBtn">বাতিল করুন</button>
+          </div>
+          <p class="msg" id="formMsg"></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>সব প্রোডাক্ট (<span id="countLabel">0</span>)</h2>
+        <p style="font-size:12.5px; color:var(--ink-soft); margin:-6px 0 12px;">💡 একাধিক প্রোডাক্টে একসাথে ক্যাটাগরি বসাতে চাইলে যেকোনো প্রোডাক্টে চেপে ধরে রাখুন (লং-প্রেস) — সিলেক্ট মোড চালু হবে, তারপর আরও প্রোডাক্ট ট্যাপ করে যোগ করুন।</p>
+        <div class="bulk-action-bar hidden" id="bulkActionBar">
+          <span><b id="bulkSelectedCount">0</b>টি প্রোডাক্ট সিলেক্ট করা হয়েছে</span>
+          <select id="bulkMainCategory">
+            <option value="">ক্যাটাগরি বাছুন</option>
+          </select>
+          <button type="button" class="btn" id="bulkApplyCategoryBtn">নির্বাচিতগুলোতে প্রয়োগ করুন</button>
+          <button type="button" class="btn btn-outline" id="bulkCancelSelectBtn">বাতিল</button>
+        </div>
+        <div class="product-list" id="productList"></div>
+      </div>
+    </div>
+
+    <!-- ================= COUPONS & OFFERS TAB ================= -->
+    <div class="tab-panel hidden" id="tab-coupons">
+      <div class="tab-bar tabs" style="margin-bottom:14px;">
+        <button class="ctab-btn active" data-ctab="manage">📋 সব কুপন</button>
+        <button class="ctab-btn" data-ctab="flash">⚡ ফ্ল্যাশ সেল</button>
+        <button class="ctab-btn" data-ctab="free-delivery">🚚 ফ্রি ডেলিভারি অফার</button>
+        <button class="ctab-btn" data-ctab="caption">📢 ফেসবুক ক্যাপশন</button>
+        <button class="ctab-btn" data-ctab="smart">🧠 স্মার্ট সাজেশন</button>
+      </div>
+
+      <!-- ---- সাব-ট্যাব ১: সব কুপন যোগ/এডিট (যেকোনো ধরন — %, ৳, ফ্রি ডেলিভারি) ---- -->
+      <div class="ctab-panel" id="ctab-manage">
+        <div class="card">
+          <div class="top-row">
+            <h2 style="margin:0;">🏷️ কুপন ম্যানেজমেন্ট (একাধিক কুপন)</h2>
+          </div>
+          <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">এখানে একসাথে একাধিক কুপন কোড চালু রাখতে পারবেন — প্রতিটার আলাদা ছাড়, মেয়াদ, ব্যবহার সীমা ও সর্বনিম্ন অর্ডার শর্ত সেট করা যাবে। "ফ্রি ডেলিভারি" অফার বানাতে চাইলে ছাড়ের ধরনে সেটা বেছে নিন, অথবা পাশের "🚚 ফ্রি ডেলিভারি অফার" ট্যাবে যান।</p>
+          <form id="couponForm">
+            <input type="hidden" id="editCouponId">
+            <div class="row2">
+              <div>
+                <label>কুপন কোড</label>
+                <input type="text" id="cCode" placeholder="যেমন: EID20" style="text-transform:uppercase;" required>
+              </div>
+              <div>
+                <label>ছাড়ের ধরন</label>
+                <select id="cType">
+                  <option value="percent">শতাংশ (%)</option>
+                  <option value="fixed">নির্দিষ্ট টাকা (৳)</option>
+                  <option value="free_delivery">ফ্রি ডেলিভারি (কোনো % নেই)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label>কোন প্রোডাক্টের জন্য এই কুপন?</label>
+              <select id="cProductId">
+                <option value="">সব প্রোডাক্টে চলবে (পুরো কার্টের উপর)</option>
+              </select>
+              <small class="hint">একটা নির্দিষ্ট প্রোডাক্ট বেছে নিলে এই কুপন শুধু সেই প্রোডাক্টের দামের উপর কাজ করবে — কাস্টমারের কার্টে ওই প্রোডাক্টটা না থাকলে কুপনটা কাজ করবে না। ফেসবুকে ওই প্রোডাক্টের পোস্টে কমেন্টে এই কোডটা দিয়ে দিন।</small>
+            </div>
+            <div>
+              <label>কুপনের নাম/লেবেল (ঐচ্ছিক)</label>
+              <input type="text" id="cLabel" placeholder="যেমন: ফ্রি ডেলিভারি অফার, ঈদ স্পেশাল ছাড়">
+              <small class="hint">এটা শুধু আপনার নিজের চেনার সুবিধার জন্য — তালিকায় ও ক্যাপশনে কোডের বদলে/পাশে এই নামটা দেখানো হবে। খালি রাখলে ছাড়ের ধরন অনুযায়ী একটা ডিফল্ট নাম বসে যাবে।</small>
+            </div>
+            <div>
+              <label>প্রয়োগ করলে কাস্টমার যে মেসেজ দেখবে (ঐচ্ছিক)</label>
+              <input type="text" id="cAppliedMsg" placeholder="যেমন: আপনার ডেলিভারি চার্জ একদম ফ্রি! 🎉">
+              <small class="hint">কুপন কোড বসিয়ে "প্রয়োগ করুন" চাপলে কাস্টমার এই লেখাটা দেখবে (কোড নিজে দেখতে হবে না, শুধু এই মেসেজ ও উপরের নাম/লেবেলটা চোখে পড়বে)। চাইলে লেখার ভেতর {total} লিখলে সেখানে ছাড়ের পরের সর্বমোট টাকা বসে যাবে, {discount} লিখলে কত টাকা বাঁচলো সেটা বসবে। খালি রাখলে আগের মতো স্বয়ংক্রিয় মেসেজ দেখাবে।</small>
+            </div>
+
+            <div class="row2">
+              <div id="cValueWrap">
+                <label>ছাড়ের পরিমাণ</label>
+                <input type="number" id="cValue" min="1" placeholder="যেমন: 20">
+              </div>
+              <div>
+                <label>সর্বনিম্ন অর্ডার (৳, ঐচ্ছিক)</label>
+                <input type="number" id="cMinOrder" min="0" placeholder="যেমন: 500">
+              </div>
+            </div>
+            <p class="msg" id="cTypeHint"></p>
+            <div class="row2">
+              <div>
+                <label>সর্বোচ্চ কতবার ব্যবহার হবে (ঐচ্ছিক, খালি = সীমাহীন)</label>
+                <input type="number" id="cMaxUses" min="1" placeholder="যেমন: 100">
+              </div>
+              <div>
+                <label>মেয়াদ শেষের তারিখ (ঐচ্ছিক)</label>
+                <input type="date" id="cExpiry">
+              </div>
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+              <input type="checkbox" id="cActive" checked style="width:auto;"> কুপনটি চালু রাখুন
+            </label>
+            <div style="margin-top:16px; display:flex; gap:10px;">
+              <button type="submit" class="btn" id="saveCouponBtn">কুপন সেভ করুন</button>
+              <button type="button" class="btn btn-outline hidden" id="cancelCouponEditBtn">বাতিল করুন</button>
+            </div>
+            <p class="msg" id="couponFormMsg"></p>
+          </form>
+          <div style="margin-top:18px;">
+            <h2 style="font-size:15px;">চালু থাকা সব কুপন (<span id="couponCountLabel">0</span>)</h2>
+            <div id="couponsAdminList"><p class="msg">লোড হচ্ছে...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- সাব-ট্যাব: ফ্ল্যাশ সেল (নিজে চালু/বন্ধ ও টাইমার সেট করুন) ---- -->
+      <div class="ctab-panel hidden" id="ctab-flash">
+        <div class="card">
+          <h2>⚡ ফ্ল্যাশ সেল সেটআপ</h2>
+          <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">প্রথমে "🛍️ প্রোডাক্ট" ট্যাবে যে প্রোডাক্টগুলো ফ্ল্যাশ সেলে দিতে চান সেগুলোতে "⚡ ফ্ল্যাশ সেলে রাখুন" টিক দিন ও ফ্ল্যাশ দাম লিখুন। তারপর এখানে শেষ হওয়ার সময় ঠিক করে চালু করুন। সময় শেষ হলে দাম নিজে থেকেই আগের দামে ফিরে যাবে।</p>
+          <div style="display:flex; align-items:center; gap:8px; margin:10px 0;">
+            <input type="checkbox" id="flashEnabled" style="width:auto;">
+            <label for="flashEnabled" style="display:inline; font-weight:700;">ফ্ল্যাশ সেল চালু</label>
+          </div>
+          <label>সেকশনের নাম (ঐচ্ছিক)</label>
+          <input type="text" id="flashTitle" placeholder="যেমন: ঈদ ফ্ল্যাশ সেল (খালি রাখলে &quot;ফ্ল্যাশ সেল&quot;)">
+          <label style="margin-top:10px;">কখন শেষ হবে</label>
+          <input type="datetime-local" id="flashEndAt">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;">
+            <button type="button" class="btn btn-outline flash-quick" data-hours="1">এখন থেকে ১ ঘণ্টা</button>
+            <button type="button" class="btn btn-outline flash-quick" data-hours="6">৬ ঘণ্টা</button>
+            <button type="button" class="btn btn-outline flash-quick" data-hours="24">২৪ ঘণ্টা</button>
+            <button type="button" class="btn btn-outline flash-quick" data-hours="72">৩ দিন</button>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" id="flashSaveBtn">💾 সেভ করুন</button>
+            <button type="button" class="btn btn-outline" id="flashStopBtn">⏹ ফ্ল্যাশ সেল বন্ধ করুন</button>
+          </div>
+          <p class="msg" id="flashMsg"></p>
+          <p class="hint" id="flashStatus" style="margin-top:8px;"></p>
+        </div>
+      </div>
+
+      <!-- ---- সাব-ট্যাব ২: শুধু ফ্রি ডেলিভারি অফারগুলোর তালিকা ---- -->
+      <div class="ctab-panel hidden" id="ctab-free-delivery">
+        <div class="card">
+          <h2>🚚 ফ্রি ডেলিভারি অফার</h2>
+          <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">এখানে শুধু "ফ্রি ডেলিভারি" ধরনের কুপনগুলো দেখা যাবে। নতুন একটা ফ্রি ডেলিভারি অফার বানাতে "📋 সব কুপন" ট্যাবে গিয়ে ছাড়ের ধরনে "ফ্রি ডেলিভারি" বেছে ফর্মটা পূরণ করুন।</p>
+          <button type="button" class="btn btn-outline" id="goToCouponFormBtn" style="margin-bottom:14px;">➕ নতুন ফ্রি ডেলিভারি অফার বানান</button>
+          <div id="freeDeliveryCouponsList"><p class="msg">লোড হচ্ছে...</p></div>
+        </div>
+      </div>
+
+      <!-- ---- সাব-ট্যাব ৩: ফেসবুক ক্যাপশন জেনারেটর ও অটো কুপন জেনারেটর — এখন সম্পূর্ণ আলাদা দুইটা টুল, ---- -->
+      <!-- ---- একসাথে বাটনে চাপ লাগে না, একটা চালালে অন্যটা প্রভাবিত হয় না ---- -->
+      <div class="ctab-panel hidden" id="ctab-caption">
+
+        <!-- === টুল ১: শুধু কুপন তৈরি করুন === -->
+        <div class="card">
+          <h2>🏷️ প্রোডাক্টের জন্য কুপন তৈরি করুন</h2>
+          <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">এই বাটনে চাপলে শুধু একটা নতুন কুপন কোড তৈরি হয়ে "📋 সব কুপন" তালিকায় সেভ হবে — কোনো ফেসবুক ক্যাপশন এখানে তৈরি হয় না। কুপন কোডটা কাস্টমারকে কমেন্ট/ইনবক্সে সরাসরি বলে দিন, সাইটে কোডটা দেখানো হয় না।</p>
+
+          <label>প্রোডাক্ট বাছুন</label>
+          <select id="genCouponProductSelect">
+            <option value="">-- প্রোডাক্ট বাছুন --</option>
+          </select>
+
+          <div class="row2">
+            <div>
+              <label>ছাড়ের ধরন</label>
+              <select id="genCouponType">
+                <option value="percent">শতাংশ (%)</option>
+                <option value="fixed">নির্দিষ্ট টাকা (৳)</option>
+                <option value="free_delivery">ফ্রি ডেলিভারি (কোনো % নেই)</option>
+              </select>
+            </div>
+            <div id="genCouponValueWrap">
+              <label>ছাড়ের পরিমাণ (প্রোডাক্ট বাছলে অটো হিসাব হবে, চাইলে বদলান)</label>
+              <input type="number" id="genCouponValue" min="1" placeholder="যেমন: 10">
+            </div>
+          </div>
+          <div>
+            <label>কুপনের নাম/লেবেল (ঐচ্ছিক)</label>
+            <input type="text" id="genCouponLabel" placeholder="যেমন: ফ্রি ডেলিভারি অফার">
+          </div>
+          <small class="hint" id="genCouponSuggestHint"></small>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+            <button type="button" class="btn" id="genCouponBtn">🏷️ কুপন তৈরি করুন</button>
+          </div>
+          <p class="msg" id="genCouponMsg"></p>
+
+          <div id="genCouponResultBox" class="hidden" style="margin-top:14px;">
+            <label>তৈরি হওয়া কুপন কোড (স্বয়ংক্রিয়ভাবে সেভ হয়ে গেছে — এটা শুধু আপনার নিজের জন্য, কাস্টমারকে ইনবক্স/কমেন্টে বলুন)</label>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="genCouponCodeOut" readonly style="font-weight:700; letter-spacing:1px; max-width:220px;">
+              <button type="button" class="btn btn-outline" id="genCouponCopyBtn" style="white-space:nowrap; padding:8px 14px;">📋 কোড কপি করুন</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- === টুল ২: শুধু ফেসবুক ক্যাপশন তৈরি করুন === -->
+        <div class="card">
+          <h2>📢 ফেসবুক ক্যাপশন তৈরি করুন</h2>
+          <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">এটা শুধু প্রোডাক্টের নাম, দাম, ছাড়, ভ্যারিয়েন্ট ও বিবরণ দিয়ে ইমোজিসহ একটা ফেসবুক পোস্ট ক্যাপশন লিখে দেয় (লিংকসহ) — এখানে কোনো নতুন কুপন তৈরি হয় না। ক্যাপশনে কোনো কুপন কোড উল্লেখ করতে চাইলে নিচে আগে থেকে বানানো একটা কুপন বেছে নিন, নাহলে "কোনো কুপন ছাড়া" রেখে দিন।</p>
+
+          <label>প্রোডাক্ট বাছুন</label>
+          <select id="fbProductSelect">
+            <option value="">-- প্রোডাক্ট বাছুন --</option>
+          </select>
+
+          <div>
+            <label>ক্যাপশনে যে কুপন উল্লেখ থাকবে (ঐচ্ছিক)</label>
+            <select id="fbExistingCouponSelect">
+              <option value="">-- কোনো কুপন ছাড়া --</option>
+            </select>
+            <small class="hint">শুধু এই প্রোডাক্টের জন্য আগে থেকে চালু থাকা কুপনগুলো এখানে দেখাবে। নতুন কুপন লাগলে আগে উপরের "🏷️ কুপন তৈরি করুন" অংশ থেকে বানিয়ে নিন, তারপর এখানে ফিরে এসে বেছে নিন।</small>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+            <button type="button" class="btn" id="fbGenerateBtn">📢 ক্যাপশন তৈরি করুন</button>
+          </div>
+          <p class="msg" id="fbGenMsg"></p>
+
+          <div id="fbResultBox" class="hidden" style="margin-top:14px;">
+            <label>ফেসবুক ক্যাপশন (চাইলে নিজের মতো এডিট করুন, তারপর কপি করে পোস্ট করুন)</label>
+            <textarea id="fbCaptionOut" rows="14" style="font-size:13.5px; line-height:1.7;"></textarea>
+            <button type="button" class="btn" id="fbCopyCaptionBtn" style="margin-top:8px;">📋 পুরো ক্যাপশন কপি করুন</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- সাব-ট্যাব ৪: স্মার্ট কুপন সাজেশন ---- -->
+      <div class="ctab-panel hidden" id="ctab-smart">
+        <div class="card">
+          <div class="top-row">
+            <h2 style="margin:0;">🧠 স্মার্ট কুপন সাজেশন (লস ছাড়া নিরাপদ ছাড়)</h2>
+            <button type="button" class="btn btn-outline" id="loadSmartCouponBtn" style="padding:6px 12px; font-size:12px;">🔄 হিসাব করুন</button>
+          </div>
+          <p style="font-size:13px; color:var(--ink-soft); margin-top:-2px;">এটা আপনার প্রোডাক্টের বিক্রয়মূল্য ও ক্রয়মূল্য দেখে হিসাব করে বলবে কত পার্সেন্ট পর্যন্ত ছাড় দিলে কোনো প্রোডাক্টে লস হবে না। কাজ করতে হলে প্রোডাক্ট ফর্মে "ক্রয়মূল্য" ভরে দিতে হবে।</p>
+          <div id="smartCouponBox"><p class="msg">"হিসাব করুন" বাটনে চাপুন।</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= ORDERS TAB ================= -->
+    <div class="tab-panel hidden" id="tab-orders">
+      <div class="stat-grid" id="orderStatGrid"></div>
+      <div class="card">
+        <div class="top-row" style="flex-wrap:wrap; gap:10px;">
+          <h2 style="margin:0;">সব অর্ডার (<span id="orderCountLabel">0</span>)</h2>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <select id="orderStatusFilter">
+              <option value="all">সব স্ট্যাটাস</option>
+              <option value="pending">অপেক্ষমাণ</option>
+              <option value="confirmed">নিশ্চিত হয়েছে</option>
+              <option value="processing">প্রস্তুত হচ্ছে</option>
+              <option value="shipped">পাঠানো হয়েছে</option>
+              <option value="delivered">ডেলিভারি সম্পন্ন</option>
+              <option value="cancelled">বাতিল হয়েছে</option>
+            </select>
+            <input type="text" id="orderSearchInput" placeholder="নাম, ফোন বা অর্ডার আইডি খুঁজুন" style="min-width:200px;">
+            <button type="button" class="btn btn-outline" id="exportOrdersBtn">⬇️ CSV এক্সপোর্ট করুন</button>
+          </div>
+        </div>
+        <div id="ordersAdminList"><p class="msg">লোড হচ্ছে...</p></div>
+      </div>
+    </div>
+
+    <!-- ================= SITE SETTINGS TAB ================= -->
+    <div class="tab-panel hidden" id="tab-settings">
+      <div class="card">
+        <h2>থিম রং ও অফার ব্যানার</h2>
+        <div class="row2">
+          <div>
+            <label>প্রধান রং (হেডার, বাটন)</label>
+            <input type="color" id="sPrimaryColor" value="#14294D" style="height:42px; padding:4px;">
+          </div>
+          <div>
+            <label>এক্সেন্ট রং (দাম, ছাড়ের ব্যাজ)</label>
+            <input type="color" id="sAccentColor" value="#FF7A1A" style="height:42px; padding:4px;">
+          </div>
+        </div>
+        <div class="row2" style="margin-top:14px;">
+          <div>
+            <label>ব্যাকগ্রাউন্ড রং (পুরো সাইটের পেছনের রং)</label>
+            <input type="color" id="sBackgroundColor" value="#F5F5F5" style="height:42px; padding:4px;">
+          </div>
+          <div>
+            <label>লেখার রং (সাধারণ টেক্সট)</label>
+            <input type="color" id="sTextColor" value="#1E293B" style="height:42px; padding:4px;">
+          </div>
+        </div>
+        <div class="row2" style="margin-top:14px;">
+          <div>
+            <label>হেডারের ব্যাকগ্রাউন্ড রং</label>
+            <input type="color" id="sHeaderBg" value="#FAF7F2" style="height:42px; padding:4px;">
+          </div>
+          <div>
+            <label>ফুটারের ব্যাকগ্রাউন্ড রং</label>
+            <input type="color" id="sFooterBg" value="#1E293B" style="height:42px; padding:4px;">
+          </div>
+        </div>
+        <label style="margin-top:14px;">সাইটের ফন্ট (লেখার ধরন)</label>
+        <select id="sFontFamily">
+          <option value="Hind Siliguri">Hind Siliguri (ডিফল্ট)</option>
+          <option value="Noto Sans Bengali">Noto Sans Bengali</option>
+          <option value="Baloo Da 2">Baloo Da 2 (গোলগাল, বোল্ড)</option>
+          <option value="Tiro Bangla">Tiro Bangla (ক্লাসিক)</option>
+          <option value="Atma">Atma (হাতে লেখার মতো)</option>
+        </select>
+        <label style="margin-top:14px;">অফার ব্যানার লেখা (খালি রাখলে দেখাবে না)</label>
+        <input type="text" id="sOfferBannerText" placeholder="যেমন: 🎉 ঈদ অফার! সব প্রোডাক্টে ২০% পর্যন্ত ছাড়, কুপন কোড: EID20">
+        <small class="hint">এই লেখাটা ওয়েবসাইটের একদম উপরে একটা রঙিন স্ট্রিপে দেখাবে।</small>
+      </div>
+
+      <div class="card">
+        <h2>🗂️ মেইন ক্যাটাগরি ম্যানেজমেন্ট</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">হোমপেজের উপরের ক্যাটাগরি বক্সগুলো এখান থেকে নিজে যোগ, এডিট, ডিলিট বা সাজানো (উপরে-নিচে) করতে পারবেন — কোনো কোডিং লাগবে না। কমপক্ষে ১টা ক্যাটাগরি রাখতে হবে।</p>
+        <div id="mainCatManagerList"></div>
+        <div class="row2" style="margin-top:14px; align-items:flex-end;">
+          <div>
+            <label>আইকন (একটা ইমোজি দিন)</label>
+            <input type="text" id="newCatIcon" placeholder="👗" maxlength="4">
+          </div>
+          <div>
+            <label>ক্যাটাগরির নাম</label>
+            <input type="text" id="newCatLabel" placeholder="যেমন: জুতা কালেকশন">
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline" id="addMainCatBtn" style="margin-top:10px;">➕ নতুন ক্যাটাগরি যোগ করুন</button>
+        <small class="hint">নতুন ক্যাটাগরি যোগ করার পর নিচে "সেটিংস সেভ করুন" চাপতে ভুলবেন না — তারপর প্রোডাক্ট ফর্মেও এই ক্যাটাগরিটা বাছাই করা যাবে।</small>
+      </div>
+
+      <div class="card">
+        <h2>👁️ হোমপেজের সেকশন দেখাবে/লুকাবে</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">যে সেকশন এখন দরকার নেই, সেটার টিক তুলে দিলে হোমপেজে দেখাবে না।</p>
+        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sShowHero" checked style="width:auto;"> উপরের কভার ব্যানার (হিরো সেকশন)</label>
+        <label style="display:flex; align-items:center; gap:8px; margin-top:10px;"><input type="checkbox" id="sShowTrustBar" checked style="width:auto;"> ট্রাস্ট বার (ক্যাশ অন ডেলিভারি ইত্যাদি লাইন)</label>
+        <label style="display:flex; align-items:center; gap:8px; margin-top:10px;"><input type="checkbox" id="sShowAbout" checked style="width:auto;"> "কেন বেছে নেবেন" সেকশন</label>
+      </div>
+
+      <div class="card">
+        <p style="font-size:13px; color:var(--ink-soft);">🏷️ কুপন কোড, ফ্রি ডেলিভারি অফার ও ফেসবুক ক্যাপশন তৈরির সব টুল এখন এখানে <b>"🏷️ কুপন ও অফার"</b> ট্যাবে পাবেন — নিচে থেকে বাছুন।</p>
+      </div>
+
+      <div class="card">
+        <h2>🎛️ ডিজাইন কাস্টমাইজেশন (নাম, সাইজ ও লেআউট)</h2>
+        <label>সাইটের/দোকানের নাম</label>
+        <input type="text" id="sSiteName" placeholder="যেমন: Openshop / সোনালী ফ্যাশন">
+        <small class="hint">খালি রাখলে ডিফল্ট নাম "Openshop" দেখাবে। এখানে লিখলে হেডার, ফুটার ও ব্রাউজার ট্যাব — সব জায়গার নাম বদলে যাবে।</small>
+
+        <div class="row2" style="margin-top:14px;">
+          <div>
+            <label>লোগোর সাইজ — <span id="sLogoSizeVal"></span></label>
+            <input type="range" class="designSlider" id="sLogoSize" min="28" max="90" value="42" data-unit="px">
+          </div>
+          <div>
+            <label>সাইটের প্রস্থ (ডেস্কটপে) — <span id="sContainerWidthVal"></span></label>
+            <input type="range" class="designSlider" id="sContainerWidth" min="960" max="1400" value="1180" step="10" data-unit="px">
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:14px;">
+          <div>
+            <label>কার্ড/বক্সের কোণা গোলাকার — <span id="sCardRadiusVal"></span></label>
+            <input type="range" class="designSlider" id="sCardRadius" min="0" max="30" value="12" data-unit="px">
+          </div>
+          <div>
+            <label>বাটনের শেপ (চারকোণা ↔ গোল বড়ি) — <span id="sBtnRadiusVal"></span></label>
+            <input type="range" class="designSlider" id="sBtnRadius" min="0" max="40" value="40" data-unit="px">
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:14px;">
+          <div>
+            <label>উপরের কভার ব্যানার — কত উঁচু — <span id="sHeroPadVal"></span></label>
+            <input type="range" class="designSlider" id="sHeroPad" min="0" max="140" value="0" data-unit="px">
+          </div>
+          <div>
+            <label>সাধারণ লেখার সাইজ — <span id="sBodyFontSizeVal"></span></label>
+            <input type="range" class="designSlider" id="sBodyFontSize" min="13" max="19" value="15" data-unit="px">
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:14px;">
+          <div>
+            <label>প্রোডাক্টের নামের সাইজ — <span id="sProductNameSizeVal"></span></label>
+            <input type="range" class="designSlider" id="sProductNameSize" min="11" max="20" value="13" data-unit="px">
+          </div>
+          <div>
+            <label>দামের সাইজ — <span id="sPriceSizeVal"></span></label>
+            <input type="range" class="designSlider" id="sPriceSize" min="12" max="24" value="15" data-unit="px">
+          </div>
+        </div>
+
+        <label style="margin-top:14px;">সেকশনের বড় টাইটেলের সাইজ (যেমন "আমাদের প্রোডাক্ট", "কেন আমরা") — <span id="sSectionTitleSizeVal"></span></label>
+        <input type="range" class="designSlider" id="sSectionTitleSize" min="18" max="38" value="28" data-unit="px">
+
+        <small class="hint">প্রতিটা স্লাইডার টেনে ছোট-বড় করুন — নিচে "সেটিংস সেভ করুন" চাপলে পুরো ওয়েবসাইটে সাথে সাথে বদলে যাবে। কোনো অপশনে সমস্যা মনে হলে স্লাইডারটা আবার ডিফল্ট জায়গায় নিয়ে সেভ করলেই আগের মতো হয়ে যাবে।</small>
+      </div>
+
+      <div class="card">
+        <h2>হোম পেজের কভার ফটো ও লোগো</h2>
+        <label>কভার ফটো (হিরো ব্যাকগ্রাউন্ড)</label>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" id="pickCoverBtn">📷 গ্যালারি থেকে বাছুন</button>
+          <button type="button" class="btn btn-outline" id="editCoverBtn">🖌️ ছবি এডিট করুন</button>
+          <input type="file" id="coverImageFile" accept="image/*" class="hidden">
+          <span id="coverUploadStatus" style="font-size:13px; color:var(--ink-soft);"></span>
+        </div>
+        <img id="coverPreview" class="settings-preview">
+        <input type="text" id="sCoverImage" placeholder="https://..." style="margin-top:10px;">
+
+        <label>লোগো</label>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" id="pickLogoBtn">📷 গ্যালারি থেকে বাছুন</button>
+          <button type="button" class="btn btn-outline" id="editLogoBtn">🖌️ ছবি এডিট করুন</button>
+          <input type="file" id="logoImageFile" accept="image/*" class="hidden">
+          <span id="logoUploadStatus" style="font-size:13px; color:var(--ink-soft);"></span>
+        </div>
+        <img id="logoPreview" class="settings-preview" style="max-height:90px; width:90px; border-radius:50%;">
+        <input type="text" id="sLogoImage" placeholder="https://..." style="margin-top:10px;">
+      </div>
+
+      <div class="card">
+        <h2>হোম পেজের লেখা</h2>
+        <label>ছোট লাইন (Eyebrow)</label>
+        <input type="text" id="sHeroEyebrow" placeholder="বাকেরগঞ্জ, বরিশাল থেকে সারাদেশে">
+        <label>প্রধান শিরোনাম</label>
+        <input type="text" id="sHeroTitle" placeholder="মডার্ন নারীদের প্রিমিয়াম ফ্যাশন ডেস্টিনেশন">
+        <label>বিবরণ</label>
+        <textarea id="sHeroDesc"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>সাইটের বাকি সব লেখা কাস্টমাইজ করুন</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">যেকোনো ফিল্ড খালি রাখলে ওয়েবসাইটে আগের ডিফল্ট লেখাটাই দেখাবে।</p>
+
+        <h3 style="font-size:14px; margin:14px 0 6px;">হেডার</h3>
+        <label>ব্র্যান্ড ট্যাগলাইন (লোগোর পাশে ছোট লাইন)</label>
+        <input type="text" id="sBrandTagline" placeholder="আপনার পছন্দের সবকিছু, এক জায়গায়">
+        <label>সার্চ বক্সের প্লেসহোল্ডার</label>
+        <input type="text" id="sSearchPlaceholder" placeholder="প্রোডাক্ট খুঁজুন...">
+        <div class="row2">
+          <div><label>মেনু: সব প্রোডাক্ট</label><input type="text" id="sNavProducts" placeholder="সব প্রোডাক্ট"></div>
+          <div><label>মেনু: ক্যাটাগরি</label><input type="text" id="sNavCategories" placeholder="ক্যাটাগরি"></div>
+        </div>
+        <div class="row2">
+          <div><label>মেনু: আমাদের কথা</label><input type="text" id="sNavAbout" placeholder="আমাদের কথা"></div>
+          <div><label>মেনু: যোগাযোগ</label><input type="text" id="sNavContact" placeholder="যোগাযোগ"></div>
+        </div>
+
+        <h3 style="font-size:14px; margin:18px 0 6px;">ট্রাস্ট বার (উপরের ৩টা লাইন)</h3>
+        <input type="text" id="sTrustBar1" placeholder="✅ ১০০% ক্যাশ অন ডেলিভারি" style="margin-bottom:8px;">
+        <input type="text" id="sTrustBar2" placeholder="🚚 সারাদেশে ডেলিভারি" style="margin-bottom:8px;">
+        <input type="text" id="sTrustBar3" placeholder="↩️ সহজ এক্সচেঞ্জ">
+
+        <h3 style="font-size:14px; margin:18px 0 6px;">প্রোডাক্ট সেকশন</h3>
+        <label>শিরোনাম</label>
+        <input type="text" id="sProductsTitle" placeholder="জনপ্রিয় প্রোডাক্ট">
+        <label>সাবটাইটেল</label>
+        <input type="text" id="sProductsDesc" placeholder="প্রতিটি পণ্যের ছবিতে ক্লিক করে বিস্তারিত দেখুন">
+        <label>কোনো প্রোডাক্ট না থাকলে যে বার্তা দেখাবে</label>
+        <input type="text" id="sEmptyStateText" placeholder="এই মুহূর্তে কোনো প্রোডাক্ট পাওয়া যায়নি। অন্য ক্যাটাগরি ট্রাই করুন।">
+
+        <h3 style="font-size:14px; margin:18px 0 6px;">"কেন বেছে নেবেন" সেকশন</h3>
+        <label>শিরোনাম</label>
+        <input type="text" id="sAboutTitle" placeholder="Openshop কেন বেছে নেবেন?">
+        <div class="row2">
+          <div><label>কার্ড ১ শিরোনাম</label><input type="text" id="sAbout1Title" placeholder="যাচাই করা প্রোডাক্ট"></div>
+          <div><label>কার্ড ১ বিবরণ</label><input type="text" id="sAbout1Desc" placeholder="ছবি ও বিবরণে যা দেখবেন, বাস্তবে ঠিক তেমনই পাবেন।"></div>
+        </div>
+        <div class="row2">
+          <div><label>কার্ড ২ শিরোনাম</label><input type="text" id="sAbout2Title" placeholder="ক্যাশ অন ডেলিভারি"></div>
+          <div><label>কার্ড ২ বিবরণ</label><input type="text" id="sAbout2Desc" placeholder="পণ্য হাতে পেয়ে দাম পরিশোধ করুন।"></div>
+        </div>
+        <div class="row2">
+          <div><label>কার্ড ৩ শিরোনাম</label><input type="text" id="sAbout3Title" placeholder="সারাদেশে ডেলিভারি"></div>
+          <div><label>কার্ড ৩ বিবরণ</label><input type="text" id="sAbout3Desc" placeholder="কুরিয়ারের মাধ্যমে দেশের যেকোনো প্রান্তে পণ্য পৌঁছে যায়।"></div>
+        </div>
+
+        <h3 style="font-size:14px; margin:18px 0 6px;">ফুটার</h3>
+        <label>ফুটারের ট্যাগলাইন</label>
+        <input type="text" id="sFooterTagline" placeholder="আপনার পছন্দের সবকিছু, এক জায়গায়">
+        <div class="row2">
+          <div><label>"যোগাযোগ" শিরোনাম</label><input type="text" id="sFooterContactTitle" placeholder="যোগাযোগ"></div>
+          <div><label>"অর্ডার গ্রহণ" শিরোনাম</label><input type="text" id="sFooterHoursTitle" placeholder="অর্ডার গ্রহণ"></div>
+        </div>
+        <div class="row2">
+          <div><label>খোলা থাকার সময়</label><input type="text" id="sFooterHoursText" placeholder="সপ্তাহের ৭ দিন — সবসময় খোলা"></div>
+          <div><label>হটলাইন লাইন</label><input type="text" id="sFooterHotline" placeholder="হটলাইন: 01877-405001"></div>
+        </div>
+        <label>কপিরাইট লাইন (© বছর এর পরে যা লেখা থাকবে)</label>
+        <input type="text" id="sCopyrightText" placeholder="Openshop। সর্বস্বত্ব সংরক্ষিত।">
+
+        <h3 style="font-size:14px; margin:18px 0 6px;">কার্ট ও চেকআউট</h3>
+        <div class="row2">
+          <div><label>কার্ট ড্রয়ারের শিরোনাম</label><input type="text" id="sCartTitle" placeholder="আপনার কার্ট"></div>
+          <div><label>চেকআউট বাটনের লেখা</label><input type="text" id="sCheckoutBtnText" placeholder="হোয়াটসঅ্যাপে অর্ডার করুন"></div>
+        </div>
+        <label>কার্টের নিচের সাহায্যকারী লাইন</label>
+        <input type="text" id="sCartNote" placeholder="অর্ডার করার পর একটা অর্ডার আইডি পাবেন...">
+        <div class="row2">
+          <div><label>অর্ডার কনফার্ম শিরোনাম</label><input type="text" id="sOrderConfirmTitle" placeholder="অর্ডার সম্পন্ন হয়েছে!"></div>
+          <div><label>অর্ডার কনফার্ম বিবরণ</label><input type="text" id="sOrderConfirmDesc" placeholder="WhatsApp চ্যাট নতুন ট্যাবে খোলা হয়েছে..."></div>
+        </div>
+
+        <h3 style="font-size:14px; margin:18px 0 6px;">নিচের মোবাইল মেনু</h3>
+        <div class="row2">
+          <div><label>হোম</label><input type="text" id="sBnHome" placeholder="হোম"></div>
+          <div><label>বিভাগ</label><input type="text" id="sBnCategories" placeholder="বিভাগ"></div>
+        </div>
+        <div class="row2">
+          <div><label>সার্চ</label><input type="text" id="sBnSearch" placeholder="সার্চ"></div>
+          <div><label>কার্ট</label><input type="text" id="sBnCart" placeholder="কার্ট"></div>
+        </div>
+        <label>প্রোফাইল</label>
+        <input type="text" id="sBnProfile" placeholder="প্রোফাইল">
+      </div>
+
+      <div class="card">
+        <h2>যোগাযোগের তথ্য</h2>
+        <div class="row2">
+          <div>
+            <label>ঠিকানা</label>
+            <input type="text" id="sAddress">
+          </div>
+          <div>
+            <label>ফোন নম্বর</label>
+            <input type="text" id="sPhone" placeholder="+880 1877-405001">
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label>হোয়াটসঅ্যাপ নম্বর (দেশের কোডসহ, + ছাড়া)</label>
+            <input type="text" id="sWhatsapp" placeholder="8801877405001">
+          </div>
+          <div>
+            <label>ইমেইল</label>
+            <input type="text" id="sEmail">
+          </div>
+        </div>
+        <label>Facebook পেজ লিংক</label>
+        <input type="text" id="sFacebookLink" placeholder="https://www.facebook.com/...">
+        <label style="margin-top:14px; display:block;">Messenger পেজ ইউজারনেম/আইডি (m.me লিংকের জন্য)</label>
+        <input type="text" id="sMessengerId" placeholder="যেমন: fittogift608 (facebook.com/এর পরের অংশ)">
+        <div style="margin-top:16px;">
+          <button class="btn" id="saveSettingsBtn">সেটিংস সেভ করুন</button>
+        </div>
+        <p class="msg" id="settingsMsg"></p>
+      </div>
+    </div>
+
+    <!-- ================= LEADS TAB ================= -->
+    <div class="tab-panel hidden" id="tab-leads">
+      <div class="card">
+        <h2>যারা অর্ডার করতে চেয়েছেন (নাম/ফোন দিয়েছেন)</h2>
+        <p style="font-size:13px; color:var(--ink-soft);">এই তালিকা শুধু তখনই তৈরি হয় যখন কোনো ক্রেতা চেকআউটের সময় নিজে থেকে নাম/ফোন দিয়ে থাকেন — এটা গোপনে সংগ্রহ করা হয় না।</p>
+        <div id="leadsList"><p class="msg">লোড হচ্ছে...</p></div>
+      </div>
+    </div>
+
+    <!-- ================= REVIEWS TAB ================= -->
+    <div class="tab-panel hidden" id="tab-reviews">
+      <div class="card">
+        <div class="top-row" style="flex-wrap:wrap; gap:10px;">
+          <h2 style="margin:0;">⭐ কাস্টমার রিভিউ (<span id="reviewCountLabel">0</span>)</h2>
+          <select id="reviewProductFilter" style="max-width:220px;">
+            <option value="all">সব প্রোডাক্ট</option>
+          </select>
+        </div>
+        <p style="font-size:13px; color:var(--ink-soft); margin-top:-6px;">অনুপযুক্ত বা ভুয়া রিভিউ এখান থেকে মুছে ফেলতে পারবেন।</p>
+        <div id="reviewsAdminList"><p class="msg">লোড হচ্ছে...</p></div>
+      </div>
+    </div>
+
+    <!-- ================= LOCATION TAB ================= -->
+    <div class="tab-panel hidden" id="tab-location">
+      <div class="card">
+        <h2>📍 যেসব ভিজিটর লোকেশন এলাউ করেছেন (<span id="locationCountLabel">0</span> জন)</h2>
+        <p style="font-size:13px; color:var(--ink-soft);">সাইটে ঢোকার সময় ব্রাউজারের লোকেশন পারমিশন পপআপে যারা "Allow" করেছেন, তাদের লোকেশন এখানে সময়সহ তালিকাভুক্ত হয় (যারা Deny করেছেন তারা এখানে আসবেন না)।</p>
+        <div id="locationList"><p class="msg">লোড হচ্ছে...</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= IMAGE EDITOR MODAL (Fabric.js) ================= -->
+<div id="imgEditorModal" class="hidden">
+  <div class="editorBox">
+    <div class="ed-topbar">
+      <button type="button" class="ed-iconbtn" id="editorCloseX" title="বন্ধ করুন">✕</button>
+      <h3>🖌️ ছবি এডিট করুন</h3>
+      <button type="button" class="ed-iconbtn" id="editorUndoBtn" title="Undo" disabled>↶</button>
+      <button type="button" class="ed-iconbtn" id="editorRedoBtn" title="Redo" disabled>↷</button>
+    </div>
+
+    <div class="ed-body">
+      <div class="ed-canvas-area" id="editorCanvasWrap">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+
+      <div class="ed-crop-toolbar hidden" id="edCropToolbar">
+        <span>কোণে টেনে ক্রপ এরিয়া ঠিক করুন</span>
+        <button type="button" class="ed-crop-ratio active" data-ratio="free">ফ্রি</button>
+        <button type="button" class="ed-crop-ratio" data-ratio="1">১:১</button>
+        <button type="button" class="ed-crop-ratio" data-ratio="0.8">৪:৫</button>
+        <button type="button" class="ed-crop-ratio" data-ratio="1.7778">১৬:৯</button>
+        <button type="button" class="btn" id="editorCropApplyBtn" style="padding:8px 16px;">✅ ক্রপ করুন</button>
+        <button type="button" class="btn btn-outline" id="editorCropCancelBtn" style="padding:8px 16px;">বাতিল</button>
+      </div>
+
+      <div class="ed-tools" id="edToolbar">
+        <button type="button" class="ed-tool active" data-tool="adjust"><span class="ico">🎚️</span>এডজাস্ট</button>
+        <button type="button" class="ed-tool" data-tool="filter"><span class="ico">🎨</span>ফিল্টার</button>
+        <button type="button" class="ed-tool" data-tool="crop"><span class="ico">✂️</span>ক্রপ</button>
+        <button type="button" class="ed-tool" data-tool="transform"><span class="ico">🔄</span>ঘোরান</button>
+        <button type="button" class="ed-tool" data-tool="text"><span class="ico">🔤</span>টেক্সট</button>
+        <button type="button" class="ed-tool" data-tool="draw"><span class="ico">🖊️</span>আঁকুন</button>
+        <button type="button" class="ed-tool" data-tool="sticker"><span class="ico">😊</span>স্টিকার</button>
+        <button type="button" class="ed-tool" data-tool="layer"><span class="ico">🗂️</span>লেয়ার</button>
+      </div>
+
+      <!-- Adjust panel -->
+      <div class="ed-panel" id="edPanel-adjust">
+        <div class="ed-row">
+          <label>উজ্জ্বলতা</label>
+          <input type="range" id="editorBrightnessSlider" min="-100" max="100" value="0">
+          <span class="ed-val" id="editorBrightnessVal">0</span>
+        </div>
+        <div class="ed-row">
+          <label>কনট্রাস্ট</label>
+          <input type="range" id="editorContrastSlider" min="-100" max="100" value="0">
+          <span class="ed-val" id="editorContrastVal">0</span>
+        </div>
+        <div class="ed-row">
+          <label>স্যাচুরেশন</label>
+          <input type="range" id="editorSaturationSlider" min="-100" max="100" value="0">
+          <span class="ed-val" id="editorSaturationVal">0</span>
+        </div>
+        <div class="ed-row">
+          <button type="button" class="btn btn-outline" id="editorResetAdjustBtn" style="margin-left:auto; padding:7px 14px;">রিসেট</button>
+        </div>
+      </div>
+
+      <!-- Filter panel -->
+      <div class="ed-panel hidden" id="edPanel-filter">
+        <div class="ed-filters" id="editorFilterChips">
+          <button type="button" class="ed-filter-chip active" data-filter="none">অরিজিনাল</button>
+          <button type="button" class="ed-filter-chip" data-filter="grayscale">ব্ল্যাক & হোয়াইট</button>
+          <button type="button" class="ed-filter-chip" data-filter="sepia">সেপিয়া</button>
+          <button type="button" class="ed-filter-chip" data-filter="vintage">ভিনটেজ</button>
+          <button type="button" class="ed-filter-chip" data-filter="bright">ব্রাইট</button>
+          <button type="button" class="ed-filter-chip" data-filter="contrast">পপ</button>
+          <button type="button" class="ed-filter-chip" data-filter="cool">কুল</button>
+          <button type="button" class="ed-filter-chip" data-filter="warm">ওয়ার্ম</button>
+        </div>
+      </div>
+
+      <!-- Transform panel -->
+      <div class="ed-panel hidden" id="edPanel-transform">
+        <div class="ed-row" style="gap:8px;">
+          <button type="button" class="btn btn-outline" id="editorRotateLeftBtn" style="flex:1; padding:10px;">⟲ বামে ঘোরান</button>
+          <button type="button" class="btn btn-outline" id="editorRotateRightBtn" style="flex:1; padding:10px;">⟳ ডানে ঘোরান</button>
+        </div>
+        <div class="ed-row" style="gap:8px;">
+          <button type="button" class="btn btn-outline" id="editorFlipHBtn" style="flex:1; padding:10px;">⇋ আড়াআড়ি ফ্লিপ</button>
+          <button type="button" class="btn btn-outline" id="editorFlipVBtn" style="flex:1; padding:10px;">⇅ উলম্ব ফ্লিপ</button>
+        </div>
+      </div>
+
+      <!-- Text panel -->
+      <div class="ed-panel hidden" id="edPanel-text">
+        <input type="text" id="editorTextInput" placeholder="যেমন: নতুন এসেছে!" style="margin-bottom:10px;">
+        <div class="ed-row">
+          <label>ফন্ট</label>
+          <select id="editorTextFont" style="flex:1;">
+            <option value="'Hind Siliguri', sans-serif">Hind Siliguri</option>
+            <option value="'Tiro Bangla', serif">Tiro Bangla</option>
+            <option value="'Baloo Da 2', sans-serif">Baloo Da 2</option>
+            <option value="'Atma', cursive">Atma</option>
+            <option value="Arial, sans-serif">Arial</option>
+          </select>
+        </div>
+        <div class="ed-row">
+          <label>রং</label>
+          <input type="color" id="editorTextColor" value="#ffffff" style="height:38px; padding:2px; flex:none; width:56px;">
+          <label style="width:auto; margin:0 6px 0 auto; display:flex; align-items:center; gap:6px; text-transform:none; font-weight:600; color:var(--ink-soft);">
+            <input type="checkbox" id="editorTextBgToggle" style="width:16px; height:16px;"> ব্যাকগ্রাউন্ড
+          </label>
+          <input type="color" id="editorTextBgColor" value="#000000" style="height:38px; width:44px; padding:2px; flex:none;">
+        </div>
+        <button type="button" class="btn" id="editorAddTextBtn" style="width:100%; margin-top:6px;">➕ টেক্সট বসান</button>
+      </div>
+
+      <!-- Draw panel -->
+      <div class="ed-panel hidden" id="edPanel-draw">
+        <div class="ed-row">
+          <label>মোড</label>
+          <button type="button" class="btn btn-outline" id="editorDrawToggleBtn" style="padding:8px 14px;">🖊️ আঁকা মোড চালু করুন</button>
+        </div>
+        <div class="ed-row">
+          <label>রং</label>
+          <input type="color" id="editorDrawColor" value="#e0245e" style="height:38px; width:50px; padding:2px; flex:none;">
+          <label style="width:auto; margin:0; text-transform:none; font-weight:600;">সাইজ</label>
+          <input type="range" id="editorDrawSize" min="2" max="40" value="6">
+        </div>
+        <div class="ed-row">
+          <button type="button" class="btn btn-outline" id="editorClearDrawBtn" style="padding:8px 12px; margin-left:auto;">🧹 সব আঁকা মুছুন</button>
+        </div>
+        <p style="font-size:12px; color:var(--ink-soft); margin:2px 0 0;">আঁকা মোড চালু করে ছবির উপর আঙুল/মাউস দিয়ে টেনে আঁকুন। শেষ হলে আবার বাটনে চেপে মোড বন্ধ করুন — তারপর অন্য টুল ব্যবহার করা যাবে।</p>
+      </div>
+
+      <!-- Sticker panel -->
+      <div class="ed-panel hidden" id="edPanel-sticker">
+        <div class="ed-emoji-grid" id="editorEmojiRow"></div>
+      </div>
+
+      <!-- Layer panel -->
+      <div class="ed-panel hidden" id="edPanel-layer">
+        <p id="editorLayerEmpty" style="font-size:13px; color:var(--ink-soft); margin:0 0 10px;">একটা টেক্সট, স্টিকার বা আঁকা লেয়ার সিলেক্ট করুন — তারপর এখানে সাইজ, স্বচ্ছতা ও ক্রম ঠিক করতে পারবেন।</p>
+        <div id="editorLayerControls" class="hidden">
+          <div class="ed-row">
+            <label>স্বচ্ছতা</label>
+            <input type="range" id="editorOpacitySlider" min="10" max="100" value="100">
+            <span class="ed-val" id="editorOpacityVal">100%</span>
+          </div>
+          <div class="ed-row" style="gap:8px;">
+            <button type="button" class="btn btn-outline" id="editorBringFrontBtn" style="flex:1; padding:8px;">⬆️ সামনে আনুন</button>
+            <button type="button" class="btn btn-outline" id="editorSendBackBtn" style="flex:1; padding:8px;">⬇️ পেছনে নিন</button>
+          </div>
+          <button type="button" class="btn btn-outline" id="editorDeleteLayerBtn" style="width:100%; margin-top:8px; color:var(--danger); border-color:var(--danger);">🗑️ এই লেয়ার মুছুন</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ed-actionbar">
+      <button type="button" class="btn btn-outline" id="editorCancelBtn">বাতিল</button>
+      <button type="button" class="btn" id="editorSaveBtn">✅ সেভ করুন</button>
+    </div>
+    <p class="msg" id="editorStatusMsg" style="padding:0 14px 10px; margin:0;"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+function escapeHtml(_0xval) {
+  return String(_0xval == null ? "" : _0xval).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+const loginScreen = document.getElementById("loginScreen");
+const adminScreen = document.getElementById("adminScreen");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const loginMsg = document.getElementById("loginMsg");
+const configWarning = document.getElementById("configWarning");
+let db = null;
+let auth = null;
+let editingId = null;
+const DEFAULT_MAIN_CATEGORIES = [{
+  value: "women",
+  label: "নারীদের পোশাক",
+  icon: "👗"
+}, {
+  value: "men",
+  label: "পুরুষদের পোশাক",
+  icon: "👔"
+}, {
+  value: "bags",
+  label: "বাচ্চাদের পোশাক",
+  icon: "👕"
+}, {
+  value: "seasonal",
+  label: "গৃহ সামগ্রী",
+  icon: "🏠"
+}, {
+  value: "electronics",
+  label: "ইলেকট্রনিক আইটেম",
+  icon: "🔌"
+}];
+let mainCatList = JSON.parse(JSON.stringify(DEFAULT_MAIN_CATEGORIES));
+function slugifyCatValue(_0x43c1fa, _0x1a0aeb) {
+  let _0x4be059 = _0x43c1fa.trim().toLowerCase().replace(/[^a-z0-9\u0980-\u09FF]+/g, "-").replace(/^-+|-+$/g, "");
+  if (!_0x4be059) {
+    _0x4be059 = "cat-" + Date.now();
+  }
+  let _0x801a11 = _0x4be059;
+  let _0x56b477 = 2;
+  while (_0x1a0aeb.includes(_0x801a11)) {
+    _0x801a11 = _0x4be059 + "-" + _0x56b477;
+    _0x56b477++;
+  }
+  return _0x801a11;
+}
+function mainCatLabel(_0x41d2a5) {
+  const _0x47ade3 = mainCatList.find(_0xd15ac9 => _0xd15ac9.value === _0x41d2a5);
+  if (_0x47ade3) {
+    return _0x47ade3.label;
+  } else {
+    return _0x41d2a5;
+  }
+}
+function renderMainCatManager() {
+  const _0x559867 = document.getElementById("mainCatManagerList");
+  if (!_0x559867) {
+    return;
+  }
+  if (mainCatList.length === 0) {
+    _0x559867.innerHTML = "<p class=\"msg\">কোনো ক্যাটাগরি নেই। নিচ থেকে একটা যোগ করুন।</p>";
+  } else {
+    _0x559867.innerHTML = mainCatList.map((_0x3ba72e, _0x175a85) => "\n      <div style=\"display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f0ece5;\">\n        <input type=\"text\" value=\"" + (_0x3ba72e.icon || "🛍️") + "\" maxlength=\"4\" data-idx=\"" + _0x175a85 + "\" data-field=\"icon\" class=\"catEditInput\" style=\"width:50px; text-align:center; padding:8px 4px;\">\n        <input type=\"text\" value=\"" + (_0x3ba72e.label || "").replace(/"/g, "&quot;") + "\" data-idx=\"" + _0x175a85 + "\" data-field=\"label\" class=\"catEditInput\" style=\"flex:1; padding:8px 10px;\">\n        <button type=\"button\" class=\"btn btn-outline catMoveUp\" data-idx=\"" + _0x175a85 + "\" " + (_0x175a85 === 0 ? "disabled" : "") + " style=\"padding:6px 10px;\">↑</button>\n        <button type=\"button\" class=\"btn btn-outline catMoveDown\" data-idx=\"" + _0x175a85 + "\" " + (_0x175a85 === mainCatList.length - 1 ? "disabled" : "") + " style=\"padding:6px 10px;\">↓</button>\n        <button type=\"button\" class=\"btn btn-outline catDelete\" data-idx=\"" + _0x175a85 + "\" style=\"padding:6px 10px; color:#B3261E; border-color:#B3261E;\">🗑️</button>\n      </div>").join("");
+    _0x559867.querySelectorAll(".catEditInput").forEach(_0x28f552 => {
+      _0x28f552.addEventListener("input", () => {
+        const _0x486d0f = Number(_0x28f552.dataset.idx);
+        mainCatList[_0x486d0f][_0x28f552.dataset.field] = _0x28f552.value;
+        buildMainCategorySelect();
+      });
+    });
+    _0x559867.querySelectorAll(".catMoveUp").forEach(_0x2c2686 => _0x2c2686.addEventListener("click", () => {
+      const _0x38637c = Number(_0x2c2686.dataset.idx);
+      if (_0x38637c <= 0) {
+        return;
+      }
+      [mainCatList[_0x38637c - 1], mainCatList[_0x38637c]] = [mainCatList[_0x38637c], mainCatList[_0x38637c - 1]];
+      renderMainCatManager();
+    }));
+    _0x559867.querySelectorAll(".catMoveDown").forEach(_0x3cf1c5 => _0x3cf1c5.addEventListener("click", () => {
+      const _0x3884a7 = Number(_0x3cf1c5.dataset.idx);
+      if (_0x3884a7 >= mainCatList.length - 1) {
+        return;
+      }
+      [mainCatList[_0x3884a7 + 1], mainCatList[_0x3884a7]] = [mainCatList[_0x3884a7], mainCatList[_0x3884a7 + 1]];
+      renderMainCatManager();
+    }));
+    _0x559867.querySelectorAll(".catDelete").forEach(_0x2ec1b4 => _0x2ec1b4.addEventListener("click", () => {
+      const _0x36be7c = Number(_0x2ec1b4.dataset.idx);
+      if (!confirm("এই ক্যাটাগরিটা মুছে ফেলবেন? এই ক্যাটাগরির প্রোডাক্টগুলো তখনও থাকবে, কিন্তু হোমপেজে আর আলাদা বক্স হিসেবে দেখাবে না।")) {
+        return;
+      }
+      mainCatList.splice(_0x36be7c, 1);
+      renderMainCatManager();
+    }));
+  }
+  buildMainCategorySelect();
+}
+function buildMainCategorySelect() {
+  const _0x4ccd9b = document.getElementById("fMainCategory");
+  if (_0x4ccd9b) {
+    const _0x5c9b29 = _0x4ccd9b.value;
+    _0x4ccd9b.innerHTML = "<option value=\"\">-- বাছাই করুন --</option>" + mainCatList.map(_0x4e37d8 => "<option value=\"" + _0x4e37d8.value + "\">" + (_0x4e37d8.icon || "") + " " + _0x4e37d8.label + "</option>").join("");
+    if (_0x5c9b29) {
+      _0x4ccd9b.value = _0x5c9b29;
+    }
+  }
+  const _0xbulkSel = document.getElementById("bulkMainCategory");
+  if (_0xbulkSel) {
+    const _0xbulkCur = _0xbulkSel.value;
+    _0xbulkSel.innerHTML = "<option value=\"\">ক্যাটাগরি বাছুন</option>" + mainCatList.map(_0x4e37d8 => "<option value=\"" + _0x4e37d8.value + "\">" + (_0x4e37d8.icon || "") + " " + _0x4e37d8.label + "</option>").join("");
+    if (_0xbulkCur) {
+      _0xbulkSel.value = _0xbulkCur;
+    }
+  }
+}
+function isConfigured() {
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("আপনার");
+}
+if (!isConfigured()) {
+  configWarning.textContent = "firebase-config.js ফাইলে এখনো আপনার আসল Firebase কনফিগারেশন বসানো হয়নি। README.md দেখুন।";
+  loginBtn.disabled = true;
+} else {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  auth.onAuthStateChanged(_0x49172a => {
+    if (_0x49172a && _0x49172a.email === ADMIN_EMAIL) {
+      loginScreen.classList.add("hidden");
+      adminScreen.classList.remove("hidden");
+      loadProducts();
+      loadProductOptionsForCoupon();
+      loadFbToolProducts();
+      loadSettings();
+      loadFlashSettings();
+      loadAnalytics();
+      loadLeads();
+      loadVisitorLocations();
+      startOrdersListener();
+      loadCouponsAdmin();
+      loadReviewsAdmin();
+      if ("Notification" in window && Notification.permission === "default") {
+        const _0x1f6d72 = () => {
+          Notification.requestPermission().catch(() => {});
+          adminScreen.removeEventListener("click", _0x1f6d72);
+        };
+        adminScreen.addEventListener("click", _0x1f6d72, {
+          once: true
+        });
+      }
+    } else if (_0x49172a) {
+      loginMsg.textContent = "এই Gmail (" + _0x49172a.email + ") এই এডমিন প্যানেলের জন্য অনুমোদিত নয়।";
+      auth.signOut();
+    } else {
+      loginScreen.classList.remove("hidden");
+      adminScreen.classList.add("hidden");
+      if (ordersUnsubscribe) {
+        ordersUnsubscribe();
+        ordersUnsubscribe = null;
+      }
+      knownOrderIds = null;
+      clearOrderNotifications();
+    }
+  });
+  loginBtn.addEventListener("click", () => {
+    const _0x1824dd = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(_0x1824dd).catch(_0x302345 => {
+      loginMsg.textContent = _0x302345.message;
+    });
+  });
+  logoutBtn.addEventListener("click", () => auth.signOut());
+}
+document.querySelectorAll(".tab-btn").forEach(_0x389712 => {
+  _0x389712.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(_0x66ca0d => _0x66ca0d.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(_0x40268 => _0x40268.classList.add("hidden"));
+    _0x389712.classList.add("active");
+    document.getElementById("tab-" + _0x389712.dataset.tab).classList.remove("hidden");
+    if (_0x389712.dataset.tab === "orders") {
+      clearOrderNotifications();
+    }
+  });
+});
+document.querySelectorAll(".ctab-btn").forEach(_0x489013 => {
+  _0x489013.addEventListener("click", () => {
+    document.querySelectorAll(".ctab-btn").forEach(_0x21f4e6 => _0x21f4e6.classList.remove("active"));
+    document.querySelectorAll(".ctab-panel").forEach(_0x57cf25 => _0x57cf25.classList.add("hidden"));
+    _0x489013.classList.add("active");
+    document.getElementById("ctab-" + _0x489013.dataset.ctab).classList.remove("hidden");
+  });
+});
+const goToCouponFormBtn = document.getElementById("goToCouponFormBtn");
+if (goToCouponFormBtn) {
+  goToCouponFormBtn.addEventListener("click", () => {
+    document.querySelector(".ctab-btn[data-ctab=\"manage\"]").click();
+    resetCouponForm();
+    document.getElementById("cType").value = "free_delivery";
+    applyCouponTypeUX();
+    document.getElementById("cCode").focus();
+    window.scrollTo({
+      top: document.getElementById("couponForm").offsetTop - 20,
+      behavior: "smooth"
+    });
+  });
+}
+function imgbbIsConfigured() {
+  return typeof IMGBB_API_KEYS !== "undefined" && Array.isArray(IMGBB_API_KEYS) && IMGBB_API_KEYS.some(_0x18aba8 => _0x18aba8 && !_0x18aba8.includes("আপনার") && !_0x18aba8.includes("_key_এখানে_বসান"));
+}
+function imgbbValidKeys() {
+  if (typeof IMGBB_API_KEYS !== "undefined" && Array.isArray(IMGBB_API_KEYS)) {
+    return IMGBB_API_KEYS.filter(_0xe3b37 => _0xe3b37 && !_0xe3b37.includes("আপনার") && !_0xe3b37.includes("_key_এখানে_বসান"));
+  }
+  if (typeof IMGBB_API_KEY !== "undefined" && IMGBB_API_KEY && !IMGBB_API_KEY.includes("আপনার")) {
+    return [IMGBB_API_KEY];
+  }
+  return [];
+}
+async function uploadToImgbb(_0x1c5b12, _0x51332d) {
+  const _0x1ad2a4 = imgbbValidKeys();
+  if (_0x1ad2a4.length === 0) {
+    _0x51332d.textContent = "ছবি আপলোড চালু করতে আগে IMGBB_API_KEYS বসাতে হবে (README.md দেখুন)।";
+    _0x51332d.style.color = "var(--danger)";
+    return {
+      url: null,
+      error: "IMGBB_API_KEYS কনফিগার করা নেই"
+    };
+  }
+  _0x51332d.textContent = "আপলোড হচ্ছে...";
+  _0x51332d.style.color = "var(--ink-soft)";
+  let _0xc97406 = null;
+  for (let _0x331866 = 0; _0x331866 < _0x1ad2a4.length; _0x331866++) {
+    try {
+      const _0x3863f4 = new FormData();
+      _0x3863f4.append("image", _0x1c5b12);
+      const _0x49f071 = await fetch("https://api.imgbb.com/1/upload?key=" + _0x1ad2a4[_0x331866], {
+        method: "POST",
+        body: _0x3863f4
+      });
+      let _0x4e2756;
+      try {
+        _0x4e2756 = await _0x49f071.json();
+      } catch (_0x5c3a87) {
+        throw new Error("সার্ভার থেকে অপ্রত্যাশিত রেসপন্স (HTTP " + _0x49f071.status + ")");
+      }
+      if (_0x4e2756.success) {
+        _0x51332d.textContent = "ছবি আপলোড হয়ে গেছে ✅";
+        _0x51332d.style.color = "var(--success)";
+        return {
+          url: _0x4e2756.data.display_url,
+          error: null
+        };
+      }
+      throw new Error(_0x4e2756.error?.message || "আপলোড ব্যর্থ হয়েছে (HTTP " + _0x49f071.status + ")");
+    } catch (_0x3d721d) {
+      _0xc97406 = _0x3d721d.message || "অজানা ত্রুটি";
+      if (_0x331866 < _0x1ad2a4.length - 1) {
+        continue;
+      }
+    }
+  }
+  _0x51332d.textContent = "ত্রুটি: " + _0xc97406;
+  _0x51332d.style.color = "var(--danger)";
+  return {
+    url: null,
+    error: _0xc97406
+  };
+}
+/* ======================================================================
+   PRO IMAGE EDITOR — built on Fabric.js
+   Same integration contract as before: openImageEditor(srcUrl, onSave)
+   calls onSave(hostedImageUrl) after the edited image is uploaded to ImgBB.
+   ====================================================================== */
+let edCanvas = null;        // fabric.Canvas instance
+let edBaseImage = null;     // fabric.Image (locked background layer)
+let edOnSave = null;        // callback passed into openImageEditor
+let edHistory = [];         // undo/redo stack of canvas JSON snapshots
+let edHistoryIndex = -1;
+let edSuspendHistory = false;
+let edActiveTool = "adjust";
+let edCropRect = null;      // fabric.Rect crop overlay (crop mode only)
+let edCropRatio = null;     // null = free, or a number (w/h)
+let edAdjust = { brightness: 0, contrast: 0, saturation: 0 };
+let edFilterPreset = "none";
+
+const ED_EMOJIS = ["😀", "😍", "🔥", "🎉", "⭐", "❤️", "👍", "✨", "🛍️", "🏷️", "💯", "🎁", "🆕", "✅", "📦", "💰", "🚚", "🇧🇩"];
+
+function edFilterPresetList(preset) {
+  switch (preset) {
+    case "grayscale":
+      return [new fabric.Image.filters.Grayscale()];
+    case "sepia":
+      return [new fabric.Image.filters.Sepia()];
+    case "vintage":
+      return [
+        new fabric.Image.filters.Sepia(),
+        new fabric.Image.filters.Contrast({ contrast: -0.08 }),
+        new fabric.Image.filters.Brightness({ brightness: -0.04 }),
+        new fabric.Image.filters.Saturation({ saturation: -0.15 })
+      ];
+    case "bright":
+      return [new fabric.Image.filters.Brightness({ brightness: 0.18 })];
+    case "contrast":
+      return [new fabric.Image.filters.Contrast({ contrast: 0.28 }), new fabric.Image.filters.Saturation({ saturation: 0.12 })];
+    case "cool":
+      return [new fabric.Image.filters.HueRotation({ rotation: 0.06 }), new fabric.Image.filters.Saturation({ saturation: 0.05 })];
+    case "warm":
+      return [new fabric.Image.filters.HueRotation({ rotation: -0.05 }), new fabric.Image.filters.Brightness({ brightness: 0.04 })];
+    default:
+      return [];
+  }
+}
+
+function edApplyImageFilters() {
+  if (!edBaseImage) return;
+  const filters = edFilterPresetList(edFilterPreset);
+  filters.push(new fabric.Image.filters.Brightness({ brightness: edAdjust.brightness / 100 }));
+  filters.push(new fabric.Image.filters.Contrast({ contrast: edAdjust.contrast / 100 }));
+  filters.push(new fabric.Image.filters.Saturation({ saturation: edAdjust.saturation / 100 }));
+  edBaseImage.filters = filters;
+  edBaseImage.applyFilters();
+  edCanvas.requestRenderAll();
+}
+
+function edFitCanvasToWrap() {
+  const wrap = document.getElementById("editorCanvasWrap");
+  if (!wrap || !edCanvas) return;
+  const availW = wrap.clientWidth - 20;
+  const availH = wrap.clientHeight - 20;
+  const objW = edBaseImage ? edBaseImage.getScaledWidth() : edCanvas.getWidth();
+  const objH = edBaseImage ? edBaseImage.getScaledHeight() : edCanvas.getHeight();
+  // Reset canvas logical size to the image's natural (unscaled-by-zoom) footprint
+  const baseW = edBaseImage ? edBaseImage.width * edBaseImage.scaleX : edCanvas.getWidth();
+  const baseH = edBaseImage ? edBaseImage.height * edBaseImage.scaleY : edCanvas.getHeight();
+  const zoom = Math.min(availW / baseW, availH / baseH, 1) || 1;
+  edCanvas.setWidth(baseW * zoom);
+  edCanvas.setHeight(baseH * zoom);
+  edCanvas.setZoom(zoom);
+  edCanvas.requestRenderAll();
+}
+
+function edPushHistory() {
+  if (edSuspendHistory || !edCanvas) return;
+  edHistory = edHistory.slice(0, edHistoryIndex + 1);
+  edHistory.push(JSON.stringify(edCanvas.toDatalessJSON(["selectable", "evented", "isBackground"])));
+  if (edHistory.length > 30) edHistory.shift();
+  edHistoryIndex = edHistory.length - 1;
+  edUpdateUndoRedoButtons();
+}
+
+function edUpdateUndoRedoButtons() {
+  document.getElementById("editorUndoBtn").disabled = edHistoryIndex <= 0;
+  document.getElementById("editorRedoBtn").disabled = edHistoryIndex >= edHistory.length - 1;
+}
+
+function edLoadHistoryState(json) {
+  edSuspendHistory = true;
+  edCanvas.loadFromJSON(json, () => {
+    edCanvas.getObjects().forEach(obj => {
+      if (obj.isBackground) edBaseImage = obj;
+    });
+    edCanvas.requestRenderAll();
+    edSuspendHistory = false;
+    edUpdateLayerPanel();
+  });
+}
+
+function edUndo() {
+  if (edHistoryIndex <= 0) return;
+  edHistoryIndex--;
+  edLoadHistoryState(edHistory[edHistoryIndex]);
+  edUpdateUndoRedoButtons();
+}
+
+function edRedo() {
+  if (edHistoryIndex >= edHistory.length - 1) return;
+  edHistoryIndex++;
+  edLoadHistoryState(edHistory[edHistoryIndex]);
+  edUpdateUndoRedoButtons();
+}
+
+function edSwitchTool(tool) {
+  if (edActiveTool === "crop" && tool !== "crop") edExitCropMode(false);
+  edActiveTool = tool;
+  document.querySelectorAll(".ed-tool").forEach(b => b.classList.toggle("active", b.dataset.tool === tool));
+  document.querySelectorAll(".ed-panel").forEach(p => p.classList.add("hidden"));
+  const panel = document.getElementById("edPanel-" + tool);
+  if (panel) panel.classList.remove("hidden");
+  document.getElementById("edCropToolbar").classList.toggle("hidden", tool !== "crop");
+  edCanvas.isDrawingMode = tool === "draw" && edCanvas.__drawModeOn;
+  if (tool === "crop") edEnterCropMode();
+  if (tool !== "layer") { /* keep selection as-is */ }
+}
+
+function edEnterCropMode() {
+  if (edCropRect) return;
+  const w = edBaseImage.getScaledWidth();
+  const h = edBaseImage.getScaledHeight();
+  edCropRect = new fabric.Rect({
+    left: edBaseImage.left, top: edBaseImage.top,
+    width: w * 0.86, height: h * 0.86,
+    fill: "rgba(200,155,60,0.15)", stroke: "#C89B3C", strokeWidth: 2, strokeDashArray: [8, 6],
+    cornerColor: "#C89B3C", cornerStrokeColor: "#11172E", cornerStyle: "circle", cornerSize: 16,
+    transparentCorners: false, lockRotation: true, hasRotatingPoint: false, originX: "center", originY: "center"
+  });
+  edCropRect.setControlsVisibility({ mtr: false });
+  edCanvas.add(edCropRect);
+  edCanvas.setActiveObject(edCropRect);
+  edCanvas.requestRenderAll();
+}
+
+function edApplyCropRatioLock() {
+  if (!edCropRect) return;
+  edCropRect.off("scaling");
+  if (edCropRatio) {
+    edCropRect.on("scaling", () => {
+      const w = edCropRect.getScaledWidth();
+      edCropRect.set({ height: w / edCropRatio, scaleY: 1 });
+      edCropRect.set({ scaleY: (w / edCropRatio) / edCropRect.height });
+    });
+  }
+}
+
+function edExitCropMode(apply) {
+  if (!edCropRect) return;
+  if (apply && edApplyCrop() === false) return false;
+  edCanvas.remove(edCropRect);
+  edCropRect = null;
+  edCanvas.requestRenderAll();
+}
+
+/* Canvas-এর বর্তমান ছবি (সব লেয়ারসহ) সরিয়ে dataUrl-টাকে নতুন ব্যাকগ্রাউন্ড ইমেজ বানায় */
+function edReplaceBaseWithDataUrl(dataUrl) {
+  fabric.Image.fromURL(dataUrl, img => {
+    edSuspendHistory = true;
+    edCanvas.clear();
+    img.set({ left: img.width / 2, top: img.height / 2, originX: "center", originY: "center", selectable: false, evented: false, isBackground: true, hoverCursor: "default" });
+    edBaseImage = img;
+    edCanvas.add(img);
+    edFilterPreset = "none";
+    edAdjust = { brightness: 0, contrast: 0, saturation: 0 };
+    document.querySelectorAll(".ed-filter-chip").forEach(c => c.classList.toggle("active", c.dataset.filter === "none"));
+    ["Brightness", "Contrast", "Saturation"].forEach(k => {
+      document.getElementById("editor" + k + "Slider").value = 0;
+      document.getElementById("editor" + k + "Val").textContent = "0";
+    });
+    edFitCanvasToWrap();
+    edSuspendHistory = false;
+    edPushHistory();
+  });
+}
+
+function edApplyCrop() {
+  const rect = edCropRect;
+  const zoom = edCanvas.getZoom() || 1;
+  // ক্রপ বক্সের স্থানাঙ্ক (ইমেজের আসল পিক্সেল-স্কেলে, জুম ছাড়া)
+  const box = rect.getBoundingRect(true, true);
+  const sceneW = edCanvas.getWidth() / zoom;
+  const sceneH = edCanvas.getHeight() / zoom;
+  // ছবির সীমার বাইরে গেলে ছেঁটে ভেতরে রাখা (নইলে কালো/ফাঁকা অংশ আসত)
+  const left = Math.max(0, box.left);
+  const top = Math.max(0, box.top);
+  const width = Math.min(sceneW, box.left + box.width) - left;
+  const height = Math.min(sceneH, box.top + box.height) - top;
+  if (width < 10 || height < 10) {
+    document.getElementById("editorStatusMsg").textContent = "ক্রপ বক্স ছবির ভেতরে নিন — এলাকাটা খুব ছোট বা বাইরে চলে গেছে।";
+    return false;
+  }
+  // ক্রপ বক্স নিজে (সোনালি রঙ ও ড্যাশ বর্ডার) যাতে ছবিতে না ঢোকে
+  rect.set({ visible: false });
+  edCanvas.discardActiveObject();
+  edCanvas.renderAll();
+  // toDataURL-এর left/top/width/height ক্যানভাস-পিক্সেলে (জুমসহ) ধরা হয়, তাই zoom দিয়ে গুণ,
+  // আর multiplier = 1/zoom দিয়ে পূর্ণ রেজোলিউশনে আউটপুট
+  const dataUrl = edCanvas.toDataURL({
+    left: left * zoom, top: top * zoom, width: width * zoom, height: height * zoom,
+    multiplier: 1 / zoom, format: "png"
+  });
+  edReplaceBaseWithDataUrl(dataUrl);
+  document.getElementById("editorStatusMsg").textContent = "";
+  return true;
+}
+
+function edUpdateLayerPanel() {
+  const active = edCanvas.getActiveObject();
+  const controls = document.getElementById("editorLayerControls");
+  const empty = document.getElementById("editorLayerEmpty");
+  if (active && !active.isBackground && active !== edCropRect) {
+    controls.classList.remove("hidden");
+    empty.classList.add("hidden");
+    document.getElementById("editorOpacitySlider").value = Math.round((active.opacity ?? 1) * 100);
+    document.getElementById("editorOpacityVal").textContent = Math.round((active.opacity ?? 1) * 100) + "%";
+  } else {
+    controls.classList.add("hidden");
+    empty.classList.remove("hidden");
+  }
+}
+
+function edAddText() {
+  const text = document.getElementById("editorTextInput").value.trim();
+  if (!text) return;
+  const bgOn = document.getElementById("editorTextBgToggle").checked;
+  const obj = new fabric.IText(text, {
+    left: edCanvas.getWidth() / (2 * edCanvas.getZoom()),
+    top: edCanvas.getHeight() / (2 * edCanvas.getZoom()),
+    originX: "center", originY: "center",
+    fontFamily: document.getElementById("editorTextFont").value,
+    fill: document.getElementById("editorTextColor").value,
+    fontSize: 42, fontWeight: "700",
+    backgroundColor: bgOn ? document.getElementById("editorTextBgColor").value : "",
+    padding: bgOn ? 8 : 0
+  });
+  edCanvas.add(obj);
+  edCanvas.setActiveObject(obj);
+  edCanvas.requestRenderAll();
+  document.getElementById("editorTextInput").value = "";
+  edPushHistory();
+}
+
+function edAddSticker(emoji) {
+  const obj = new fabric.IText(emoji, {
+    left: edCanvas.getWidth() / (2 * edCanvas.getZoom()),
+    top: edCanvas.getHeight() / (2 * edCanvas.getZoom()),
+    originX: "center", originY: "center",
+    fontSize: 64, fontFamily: "sans-serif"
+  });
+  edCanvas.add(obj);
+  edCanvas.setActiveObject(obj);
+  edCanvas.requestRenderAll();
+  edPushHistory();
+}
+
+function edRenderEmojiRow() {
+  const row = document.getElementById("editorEmojiRow");
+  row.innerHTML = "";
+  ED_EMOJIS.forEach(e => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "emojiPick"; b.textContent = e;
+    b.addEventListener("click", () => edAddSticker(e));
+    row.appendChild(b);
+  });
+}
+
+function edRotate(delta) {
+  if (!edBaseImage || !edCanvas) return;
+  // ক্রপ বক্স খোলা থাকলে আগে সরান
+  if (edCropRect) { edCanvas.remove(edCropRect); edCropRect = null; }
+  edCanvas.discardActiveObject();
+  edCanvas.renderAll();
+  const zoom = edCanvas.getZoom() || 1;
+  const srcUrl = edCanvas.toDataURL({ format: "png", multiplier: 1 / zoom });
+  const im = new Image();
+  im.onload = () => {
+    // ৯০° ঘোরালে চওড়া-উচ্চতা অদলবদল হয় — আলাদা ক্যানভাসে ঘুরিয়ে (সব লেয়ারসহ) নতুন ব্যাকগ্রাউন্ড বানানো হয়,
+    // যাতে ক্যানভাসের মাপ ও ছবির অবস্থান ঠিক থাকে
+    const quarter = (((delta % 360) + 360) % 360) / 90;
+    const swap = quarter % 2 === 1;
+    const tmp = document.createElement("canvas");
+    tmp.width = swap ? im.height : im.width;
+    tmp.height = swap ? im.width : im.height;
+    const ctx = tmp.getContext("2d");
+    ctx.translate(tmp.width / 2, tmp.height / 2);
+    ctx.rotate(delta * Math.PI / 180);
+    ctx.drawImage(im, -im.width / 2, -im.height / 2);
+    edReplaceBaseWithDataUrl(tmp.toDataURL("image/png"));
+  };
+  im.src = srcUrl;
+}
+
+function openImageEditor(srcUrl, onSave) {
+  edOnSave = onSave;
+  const modal = document.getElementById("imgEditorModal");
+  const statusMsg = document.getElementById("editorStatusMsg");
+  statusMsg.textContent = "";
+  statusMsg.style.color = "var(--ink-soft)";
+  document.getElementById("editorTextInput").value = "";
+  document.getElementById("editorTextFont").value = "'Hind Siliguri', sans-serif";
+  document.getElementById("editorTextBgToggle").checked = false;
+  modal.classList.remove("hidden");
+
+  if (edCanvas) { edCanvas.dispose(); edCanvas = null; }
+  edHistory = []; edHistoryIndex = -1;
+  edFilterPreset = "none";
+  edAdjust = { brightness: 0, contrast: 0, saturation: 0 };
+  edCropRect = null;
+  document.querySelectorAll(".ed-filter-chip").forEach(c => c.classList.toggle("active", c.dataset.filter === "none"));
+  ["Brightness", "Contrast", "Saturation"].forEach(k => {
+    document.getElementById("editor" + k + "Slider").value = 0;
+    document.getElementById("editor" + k + "Val").textContent = "0";
+  });
+
+  edCanvas = new fabric.Canvas("editorCanvas", { preserveObjectStacking: true, selection: true });
+  edCanvas.freeDrawingBrush = new fabric.PencilBrush(edCanvas);
+  edCanvas.freeDrawingBrush.color = document.getElementById("editorDrawColor").value;
+  edCanvas.freeDrawingBrush.width = parseInt(document.getElementById("editorDrawSize").value, 10);
+  edCanvas.__drawModeOn = false;
+
+  edCanvas.on("selection:created", edUpdateLayerPanel);
+  edCanvas.on("selection:updated", edUpdateLayerPanel);
+  edCanvas.on("selection:cleared", edUpdateLayerPanel);
+  edCanvas.on("object:modified", edPushHistory);
+  edCanvas.on("path:created", edPushHistory);
+
+  fabric.Image.fromURL(srcUrl, img => {
+    img.set({ left: img.width / 2, top: img.height / 2, originX: "center", originY: "center", selectable: false, evented: false, isBackground: true, hoverCursor: "default" });
+    edBaseImage = img;
+    edCanvas.add(img);
+    edFitCanvasToWrap();
+    edSwitchTool("adjust");
+    edPushHistory();
+  }, { crossOrigin: "anonymous" });
+
+  edRenderEmojiRow();
+  window.addEventListener("resize", edFitCanvasToWrap);
+}
+
+/* ---- wiring (runs once at page load) ---- */
+document.querySelectorAll(".ed-tool").forEach(btn => {
+  btn.addEventListener("click", () => edSwitchTool(btn.dataset.tool));
+});
+
+document.getElementById("editorUndoBtn").addEventListener("click", edUndo);
+document.getElementById("editorRedoBtn").addEventListener("click", edRedo);
+
+["Brightness", "Contrast", "Saturation"].forEach(k => {
+  const slider = document.getElementById("editor" + k + "Slider");
+  const val = document.getElementById("editor" + k + "Val");
+  slider.addEventListener("input", () => {
+    edAdjust[k.toLowerCase()] = parseInt(slider.value, 10);
+    val.textContent = slider.value;
+    edApplyImageFilters();
+  });
+  slider.addEventListener("change", edPushHistory);
+});
+document.getElementById("editorResetAdjustBtn").addEventListener("click", () => {
+  edAdjust = { brightness: 0, contrast: 0, saturation: 0 };
+  ["Brightness", "Contrast", "Saturation"].forEach(k => {
+    document.getElementById("editor" + k + "Slider").value = 0;
+    document.getElementById("editor" + k + "Val").textContent = "0";
+  });
+  edApplyImageFilters();
+  edPushHistory();
+});
+
+document.querySelectorAll(".ed-filter-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".ed-filter-chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    edFilterPreset = chip.dataset.filter;
+    edApplyImageFilters();
+    edPushHistory();
+  });
+});
+
+document.querySelectorAll(".ed-crop-ratio").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".ed-crop-ratio").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    edCropRatio = btn.dataset.ratio === "free" ? null : parseFloat(btn.dataset.ratio);
+    edApplyCropRatioLock();
+  });
+});
+document.getElementById("editorCropApplyBtn").addEventListener("click", () => { if (edExitCropMode(true) === false) return; edSwitchTool("adjust"); });
+document.getElementById("editorCropCancelBtn").addEventListener("click", () => { edExitCropMode(false); edSwitchTool("adjust"); });
+
+document.getElementById("editorRotateLeftBtn").addEventListener("click", () => edRotate(-90));
+document.getElementById("editorRotateRightBtn").addEventListener("click", () => edRotate(90));
+document.getElementById("editorFlipHBtn").addEventListener("click", () => { edBaseImage.set("flipX", !edBaseImage.flipX); edCanvas.requestRenderAll(); edPushHistory(); });
+document.getElementById("editorFlipVBtn").addEventListener("click", () => { edBaseImage.set("flipY", !edBaseImage.flipY); edCanvas.requestRenderAll(); edPushHistory(); });
+
+document.getElementById("editorAddTextBtn").addEventListener("click", edAddText);
+
+document.getElementById("editorDrawToggleBtn").addEventListener("click", function () {
+  edCanvas.__drawModeOn = !edCanvas.__drawModeOn;
+  edCanvas.isDrawingMode = edCanvas.__drawModeOn;
+  this.textContent = edCanvas.__drawModeOn ? "✋ আঁকা মোড বন্ধ করুন" : "🖊️ আঁকা মোড চালু করুন";
+  this.classList.toggle("btn", edCanvas.__drawModeOn);
+  this.classList.toggle("btn-outline", !edCanvas.__drawModeOn);
+});
+document.getElementById("editorDrawColor").addEventListener("input", e => { edCanvas.freeDrawingBrush.color = e.target.value; });
+document.getElementById("editorDrawSize").addEventListener("input", e => { edCanvas.freeDrawingBrush.width = parseInt(e.target.value, 10); });
+document.getElementById("editorClearDrawBtn").addEventListener("click", () => {
+  edCanvas.getObjects().filter(o => o.type === "path").forEach(o => edCanvas.remove(o));
+  edCanvas.requestRenderAll();
+  edPushHistory();
+});
+
+document.getElementById("editorOpacitySlider").addEventListener("input", e => {
+  const active = edCanvas.getActiveObject();
+  if (!active) return;
+  active.set("opacity", parseInt(e.target.value, 10) / 100);
+  document.getElementById("editorOpacityVal").textContent = e.target.value + "%";
+  edCanvas.requestRenderAll();
+});
+document.getElementById("editorOpacitySlider").addEventListener("change", edPushHistory);
+document.getElementById("editorBringFrontBtn").addEventListener("click", () => {
+  const a = edCanvas.getActiveObject(); if (a) { edCanvas.bringToFront(a); edPushHistory(); }
+});
+document.getElementById("editorSendBackBtn").addEventListener("click", () => {
+  const a = edCanvas.getActiveObject();
+  if (a) { edCanvas.sendToBack(a); if (edBaseImage) edCanvas.sendToBack(edBaseImage); edPushHistory(); }
+});
+document.getElementById("editorDeleteLayerBtn").addEventListener("click", () => {
+  const a = edCanvas.getActiveObject();
+  if (a && !a.isBackground) { edCanvas.remove(a); edCanvas.discardActiveObject(); edCanvas.requestRenderAll(); edUpdateLayerPanel(); edPushHistory(); }
+});
+
+function edCloseModal() {
+  document.getElementById("imgEditorModal").classList.add("hidden");
+  window.removeEventListener("resize", edFitCanvasToWrap);
+  if (edCanvas) { edCanvas.dispose(); edCanvas = null; }
+  edOnSave = null;
+}
+document.getElementById("editorCancelBtn").addEventListener("click", edCloseModal);
+document.getElementById("editorCloseX").addEventListener("click", edCloseModal);
+
+document.getElementById("editorSaveBtn").addEventListener("click", () => {
+  if (!edCanvas) return;
+  edCanvas.discardActiveObject();
+  edCanvas.requestRenderAll();
+  const statusMsg = document.getElementById("editorStatusMsg");
+  statusMsg.style.color = "var(--ink-soft)";
+  statusMsg.textContent = "ছবি তৈরি হচ্ছে...";
+  const dataUrl = edCanvas.toDataURL({ format: "jpeg", quality: 0.92, multiplier: 1 / edCanvas.getZoom() });
+  fetch(dataUrl).then(r => r.blob()).then(async blob => {
+    const file = new File([blob], "edited.jpg", { type: "image/jpeg" });
+    const { url } = await uploadToImgbb(file, statusMsg);
+    if (url) {
+      const cb = edOnSave;
+      edCloseModal();
+      if (cb) cb(url);
+    }
+  });
+});
+
+document.querySelectorAll(".designSlider").forEach(_0x358755 => {
+  const _0x13d229 = document.getElementById(_0x358755.id + "Val");
+  const _0x1e7834 = () => {
+    if (_0x13d229) {
+      _0x13d229.textContent = _0x358755.value + (_0x358755.dataset.unit || "");
+    }
+  };
+  _0x358755.addEventListener("input", _0x1e7834);
+  _0x1e7834();
+});
+const productForm = document.getElementById("productForm");
+const formMsg = document.getElementById("formMsg");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+const formTitle = document.getElementById("formTitle");
+const pickImageBtn = document.getElementById("pickImageBtn");
+const fImageFile = document.getElementById("fImageFile");
+const uploadStatus = document.getElementById("uploadStatus");
+const imageThumbGrid = document.getElementById("imageThumbGrid");
+const fImage = document.getElementById("fImage");
+let productImages = [];
+function renderImageThumbs() {
+  if (productImages.length === 0) {
+    imageThumbGrid.classList.add("hidden");
+    imageThumbGrid.innerHTML = "";
+    return;
+  }
+  imageThumbGrid.classList.remove("hidden");
+  imageThumbGrid.innerHTML = productImages.map((_0x5ba515, _0x24b497) => "\n    <div class=\"img-thumb\">\n      <img src=\"" + _0x5ba515 + "\" alt=\"ছবি " + (_0x24b497 + 1) + "\">\n      " + (_0x24b497 === 0 ? "<span class=\"cover-tag\">কভার</span>" : "") + "\n      <button type=\"button\" class=\"editBtn\" data-idx=\"" + _0x24b497 + "\" title=\"ছবি এডিট করুন\">🖌️</button>\n      <button type=\"button\" class=\"rmBtn\" data-idx=\"" + _0x24b497 + "\" title=\"মুছে ফেলুন\">×</button>\n    </div>\n  ").join("");
+  imageThumbGrid.querySelectorAll(".rmBtn").forEach(_0x5b100c => {
+    _0x5b100c.addEventListener("click", () => {
+      productImages.splice(Number(_0x5b100c.dataset.idx), 1);
+      renderImageThumbs();
+    });
+  });
+  imageThumbGrid.querySelectorAll(".editBtn").forEach(_0x3c0828 => {
+    _0x3c0828.addEventListener("click", () => {
+      const _0x4aae88 = Number(_0x3c0828.dataset.idx);
+      openImageEditor(productImages[_0x4aae88], _0x47b987 => {
+        productImages[_0x4aae88] = _0x47b987;
+        renderImageThumbs();
+      });
+    });
+  });
+}
+let productVideo = "";
+const pickVideoBtn = document.getElementById("pickImageBtn");
+const fVideoUrl = document.getElementById("fVideoUrl");
+const videoUploadStatus = document.getElementById("videoUploadStatus");
+const videoPreviewBox = document.getElementById("videoPreviewBox");
+const videoPreview = document.getElementById("videoPreview");
+const videoRemoveBtn = document.getElementById("videoRemoveBtn");
+const videoUploadDetails = document.getElementById("videoUploadDetails");
+const videoHostLabel = document.getElementById("videoHostLabel");
+const videoResultLink = document.getElementById("videoResultLink");
+const copyVideoUrlBtn = document.getElementById("copyVideoUrlBtn");
+function videoHostName(url) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    if (host === "catbox.moe" || host.endsWith(".catbox.moe")) return "Catbox.moe";
+    if (host === "cloudinary.com" || host.endsWith(".cloudinary.com")) return "Cloudinary";
+    if (host.endsWith("workers.dev")) return "Cloudflare Worker URL (প্রক্সি) — ফাইলের আসল হোস্ট URL দেখে যাচাই করুন";
+    return host || "অজানা হোস্ট";
+  } catch (_) { return "নিজে দেওয়া / অচেনা লিংক"; }
+}
+function showVideoUploadDetails(url) {
+  const cleanUrl = String(url || "").trim();
+  if (!cleanUrl) {
+    videoUploadDetails.classList.add("hidden");
+    videoResultLink.removeAttribute("href");
+    return;
+  }
+  videoHostLabel.textContent = videoHostName(cleanUrl);
+  videoResultLink.href = cleanUrl;
+  videoResultLink.textContent = cleanUrl;
+  videoUploadDetails.classList.remove("hidden");
+}
+copyVideoUrlBtn.addEventListener("click", async () => {
+  const url = videoResultLink.href;
+  if (!url || url === "#") return;
+  try {
+    await navigator.clipboard.writeText(url);
+    copyVideoUrlBtn.textContent = "কপি হয়েছে ✓";
+    setTimeout(() => { copyVideoUrlBtn.textContent = "লিংক কপি করুন"; }, 1800);
+  } catch (_) {
+    window.prompt("ভিডিও লিংক কপি করুন:", url);
+  }
+});
+fVideoUrl.addEventListener("input", () => showVideoUploadDetails(fVideoUrl.value));
+function renderVideoPreview() {
+  if (productVideo) {
+    videoPreview.src = productVideo;
+    videoPreviewBox.classList.remove("hidden");
+    showVideoUploadDetails(productVideo);
+  } else {
+    videoPreview.removeAttribute("src");
+    videoPreview.load();
+    videoPreviewBox.classList.add("hidden");
+    showVideoUploadDetails(fVideoUrl.value);
+  }
+}
+function _xhrUpload(url, fd, statusEl, parse) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.timeout = 15 * 60 * 1000;
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) statusEl.textContent = "ভিডিও আপলোড হচ্ছে... " + Math.round(e.loaded / e.total * 100) + "%";
+    };
+    xhr.onload = () => {
+      try { resolve(parse(xhr)); } catch (e) { reject(e); }
+    };
+    xhr.onerror = () => reject(new Error("নেটওয়ার্ক/CORS ত্রুটি"));
+    xhr.ontimeout = () => reject(new Error("সময় শেষ (timeout)"));
+    xhr.send(fd);
+  });
+}
+// Catbox.moe — ফ্রি। Catbox নিজে CORS সাপোর্ট করে না, তাই Cloudflare Worker প্রক্সির মাধ্যমে যায়।
+function uploadVideoToCatbox(file, statusEl) {
+  const fd = new FormData();
+  fd.append("reqtype", "fileupload");
+  fd.append("fileToUpload", file, file.name);
+  return _xhrUpload(CATBOX_PROXY_URL, fd, statusEl, xhr => {
+    const t = (xhr.responseText || "").trim();
+    if (xhr.status === 200 && /^https?:\/\//i.test(t)) return t.replace(/^http:\/\//i, "https://");
+    throw new Error(t.slice(0, 120) || ("HTTP " + xhr.status));
+  });
+}
+// পুরোনো ব্যাকআপ: Cloudinary (শুধু CATBOX_PROXY_URL ফাঁকা থাকলে)
+function uploadVideoToCloudinary(file, statusEl) {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", CLOUDINARY_PRESET);
+  return _xhrUpload("https://api.cloudinary.com/v1_1/" + CLOUDINARY_CLOUD + "/video/upload", fd, statusEl, xhr => {
+    const r = JSON.parse(xhr.responseText);
+    if (xhr.status === 200 && r.secure_url) return r.secure_url.replace("/video/upload/", "/video/upload/f_mp4,vc_h264,q_auto/").replace(/\.[a-z0-9]+$/i, ".mp4");
+    throw new Error((r.error && r.error.message) || "HTTP " + xhr.status);
+  });
+}
+async function uploadVideo(file, statusEl) {
+  const useCatbox = typeof CATBOX_PROXY_URL !== "undefined" && CATBOX_PROXY_URL && /^https:\/\//.test(CATBOX_PROXY_URL);
+  if (!useCatbox) return uploadVideoToCloudinary(file, statusEl);
+  try {
+    return await uploadVideoToCatbox(file, statusEl);
+  } catch (catboxError) {
+    // Catbox/Worker ব্যর্থ হলে বিকল্প হিসেবে Cloudinary চেষ্টা করুন।
+    if (statusEl) statusEl.textContent = "Catbox আপলোড ব্যর্থ; বিকল্প সার্ভারে চেষ্টা হচ্ছে...";
+    try {
+      return await uploadVideoToCloudinary(file, statusEl);
+    } catch (cloudinaryError) {
+      throw new Error("Catbox: " + (catboxError.message || "ব্যর্থ") + " | Cloudinary: " + (cloudinaryError.message || "ব্যর্থ"));
+    }
+  }
+}
+async function handleVideoFile(file) {
+  videoUploadStatus.style.color = "var(--ink-soft)";
+  if (file.size > 100 * 1024 * 1024) {
+    videoUploadStatus.textContent = "ভিডিও ১০০ MB-এর বেশি হওয়া যাবে না (" + Math.round(file.size / 1048576) + " MB)।";
+    videoUploadStatus.style.color = "var(--danger)";
+    return;
+  }
+  pickVideoBtn.disabled = true;
+  videoUploadStatus.textContent = "ভিডিও আপলোড হচ্ছে... 0%";
+  try {
+    productVideo = await uploadVideo(file, videoUploadStatus);
+    fVideoUrl.value = "";
+    renderVideoPreview();
+    showVideoUploadDetails(productVideo);
+    videoUploadStatus.textContent = "ভিডিও আপলোড হয়ে গেছে ✅ — হোস্টের নাম ও লিংক নিচে দেখুন। এখন প্রোডাক্ট সেভ করুন";
+    videoUploadStatus.style.color = "var(--success)";
+  } catch (err) {
+    videoUploadStatus.textContent = "ভিডিও আপলোড ব্যর্থ: " + err.message + "। আবার চেষ্টা করুন, অথবা নিচে ভিডিওর লিংক পেস্ট করুন।";
+    videoUploadStatus.style.color = "var(--danger)";
+  } finally {
+    pickVideoBtn.disabled = false;
+  }
+}
+videoRemoveBtn.addEventListener("click", () => {
+  productVideo = "";
+  fVideoUrl.value = "";
+  videoUploadStatus.textContent = "";
+  renderVideoPreview();
+});
+pickImageBtn.addEventListener("click", () => fImageFile.click());
+fImageFile.addEventListener("change", async () => {
+  const _allPicked = Array.from(fImageFile.files || []);
+  const _isVid = f => /^video\//.test(f.type) || /\.(mp4|mov|webm|mkv|m4v|3gp)$/i.test(f.name);
+  const _videoPicked = _allPicked.find(_isVid);
+  const _0x2f265c = _allPicked.filter(f => !_isVid(f));
+  fImageFile.value = "";
+  if (_videoPicked) {
+    handleVideoFile(_videoPicked);
+  }
+  if (_0x2f265c.length === 0) {
+    return;
+  }
+  if (!imgbbIsConfigured()) {
+    uploadStatus.textContent = "ছবি আপলোড চালু করতে আগে IMGBB_API_KEYS বসাতে হবে (README.md দেখুন)।";
+    uploadStatus.style.color = "var(--danger)";
+    fImageFile.value = "";
+    return;
+  }
+  uploadStatus.style.color = "var(--ink-soft)";
+  let _0x5ee0c4 = 0;
+  const _0x285e5c = {
+    textContent: "",
+    style: {}
+  };
+  uploadStatus.textContent = "আপলোড হচ্ছে... (0/" + _0x2f265c.length + ")";
+  const _0x29190c = await Promise.all(_0x2f265c.map(async _0x4a774c => {
+    const _0x4f01ab = await uploadToImgbb(_0x4a774c, _0x285e5c);
+    _0x5ee0c4++;
+    uploadStatus.textContent = "আপলোড হচ্ছে... (" + _0x5ee0c4 + "/" + _0x2f265c.length + ")";
+    return _0x4f01ab;
+  }));
+  const _0xea4a89 = _0x29190c.filter(_0x59d0f9 => _0x59d0f9.url).map(_0x297460 => _0x297460.url);
+  const _0x389224 = _0x29190c.find(_0x637002 => _0x637002.error)?.error;
+  productImages.push(..._0xea4a89);
+  const _0x242dae = _0x2f265c.length - _0xea4a89.length;
+  if (_0xea4a89.length === _0x2f265c.length) {
+    uploadStatus.textContent = _0xea4a89.length + "টি ছবি আপলোড হয়ে গেছে ✅";
+    uploadStatus.style.color = "var(--success)";
+  } else if (_0xea4a89.length > 0) {
+    uploadStatus.textContent = _0xea4a89.length + "টি ছবি আপলোড হয়েছে, " + _0x242dae + "টি ব্যর্থ হয়েছে ⚠️ (কারণ: " + _0x389224 + ")";
+    uploadStatus.style.color = "#B85C00";
+  } else {
+    uploadStatus.textContent = "ছবি আপলোড ব্যর্থ হয়েছে। কারণ: " + (_0x389224 || "অজানা ত্রুটি") + "। আবার চেষ্টা করুন।";
+    uploadStatus.style.color = "var(--danger)";
+  }
+  renderImageThumbs();
+  fImageFile.value = "";
+});
+function resetForm() {
+  productForm.reset();
+  editingId = null;
+  document.getElementById("editId").value = "";
+  formTitle.textContent = "নতুন প্রোডাক্ট যোগ করুন";
+  cancelEditBtn.classList.add("hidden");
+  productImages = [];
+  renderImageThumbs();
+  uploadStatus.textContent = "";
+  productVideo = "";
+  fVideoUrl.value = "";
+  videoUploadStatus.textContent = "";
+  renderVideoPreview();
+}
+cancelEditBtn.addEventListener("click", resetForm);
+productForm.addEventListener("submit", async _0x4d0ab9 => {
+  _0x4d0ab9.preventDefault();
+  const _0x23ebd5 = fImage.value.trim();
+  if (_0x23ebd5 && !productImages.includes(_0x23ebd5)) {
+    productImages.unshift(_0x23ebd5);
+  }
+  if (productImages.length === 0) {
+    formMsg.textContent = "অন্তত একটা ছবি বাছুন অথবা ছবির লিংক পেস্ট করুন।";
+    formMsg.className = "msg error";
+    return;
+  }
+  const _0x1cc202 = {
+    name: document.getElementById("fName").value.trim(),
+    mainCategory: document.getElementById("fMainCategory").value,
+    category: document.getElementById("fCategory").value.trim(),
+    price: Number(document.getElementById("fPrice").value),
+    oldPrice: document.getElementById("fOldPrice").value ? Number(document.getElementById("fOldPrice").value) : null,
+    stock: document.getElementById("fStock").value !== "" ? Number(document.getElementById("fStock").value) : null,
+    costPrice: document.getElementById("fCostPrice").value !== "" ? Number(document.getElementById("fCostPrice").value) : null,
+    image: productImages[0],
+    images: productImages,
+    videoUrl: (fVideoUrl.value.trim() || productVideo || null),
+    description: document.getElementById("fDesc").value.trim(),
+    sizes: document.getElementById("fSizes").value.split(",").map(_0x1e3adb => _0x1e3adb.trim()).filter(Boolean),
+    brand: document.getElementById("fBrand").value.trim() || null,
+    freeDelivery: document.getElementById("fFreeDelivery").checked,
+    flash: document.getElementById("fFlash").checked,
+    flashPrice: document.getElementById("fFlashPrice").value !== "" ? Number(document.getElementById("fFlashPrice").value) : null,
+    updatedAt: Date.now()
+  };
+  try {
+    if (editingId) {
+      await db.collection("products").doc(editingId).update(_0x1cc202);
+      formMsg.textContent = "প্রোডাক্ট আপডেট হয়েছে ✅";
+    } else {
+      await db.collection("products").add(_0x1cc202);
+      formMsg.textContent = "নতুন প্রোডাক্ট যোগ হয়েছে ✅";
+    }
+    formMsg.className = "msg ok";
+    resetForm();
+    loadProducts();
+    loadProductOptionsForCoupon();
+    loadFbToolProducts();
+  } catch (_0x4057df) {
+    formMsg.textContent = "ত্রুটি: " + _0x4057df.message;
+    formMsg.className = "msg error";
+  }
+});
+let selectMode = false;
+let selectedProductIds = new Set();
+async function loadProducts() {
+  const _0x315820 = document.getElementById("productList");
+  const _0x357426 = document.getElementById("countLabel");
+  _0x315820.innerHTML = "লোড হচ্ছে...";
+  const _0x5f5582 = await db.collection("products").orderBy("updatedAt", "desc").get();
+  _0x357426.textContent = _0x5f5582.size;
+  if (_0x5f5582.empty) {
+    _0x315820.innerHTML = "<p>এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।</p>";
+    return;
+  }
+  _0x315820.innerHTML = "";
+  _0x5f5582.forEach(_0x78f94b => {
+    const _0x33f4f8 = _0x78f94b.data();
+    const _0x362fec = document.createElement("div");
+    _0x362fec.className = "product-row";
+    _0x362fec.dataset.id = _0x78f94b.id;
+    const _0x4e8f59 = _0x33f4f8.images && _0x33f4f8.images.length ? _0x33f4f8.images[0] : _0x33f4f8.image;
+    _0x362fec.innerHTML = "\n      <input type=\"checkbox\" class=\"row-select-check hidden\" data-id=\"" + _0x78f94b.id + "\">\n      <img src=\"" + _0x4e8f59 + "\" alt=\"" + _0x33f4f8.name + "\">\n      <div class=\"info\"><b>" + _0x33f4f8.name + "</b>" + (_0x33f4f8.images && _0x33f4f8.images.length > 1 ? " <span style=\"color:var(--ink-soft);\">(" + _0x33f4f8.images.length + " ছবি)</span>" : "") + (_0x33f4f8.freeDelivery ? " <span style=\"display:inline-block; font-size:10px; font-weight:800; color:#fff; background:#1F8A4C; border-radius:5px; padding:2px 6px; vertical-align:middle;\">🚚 ফ্রি ডেলিভারি</span>" : "") + "<br>" + (_0x33f4f8.mainCategory ? (mainCatLabel(_0x33f4f8.mainCategory) || _0x33f4f8.mainCategory) + " › " : "") + _0x33f4f8.category + " • ৳" + _0x33f4f8.price + (_0x33f4f8.stock === 0 ? " • <span style=\"color:#B3261E; font-weight:700;\">স্টকে নেই</span>" : _0x33f4f8.stock !== undefined && _0x33f4f8.stock !== null && _0x33f4f8.stock <= 5 ? " • <span style=\"color:#B85C00; font-weight:700;\">মাত্র " + _0x33f4f8.stock + "টি বাকি</span>" : "") + "</div>\n      <div class=\"row-actions\">\n        <button data-id=\"" + _0x78f94b.id + "\" class=\"editBtn\">এডিট</button>\n        <button data-id=\"" + _0x78f94b.id + "\" class=\"delBtn\">ডিলিট</button>\n      </div>\n    ";
+    _0x362fec.querySelector(".editBtn").addEventListener("click", () => {
+      if (!selectMode) {
+        editProduct(_0x78f94b.id, _0x33f4f8);
+      }
+    });
+    _0x362fec.querySelector(".delBtn").addEventListener("click", () => {
+      if (!selectMode) {
+        deleteProduct(_0x78f94b.id);
+      }
+    });
+    wireRowSelection(_0x362fec, _0x78f94b.id);
+    _0x315820.appendChild(_0x362fec);
+  });
+  updateBulkBar();
+}
+function wireRowSelection(_0x363720, _0x47ec50) {
+  let _0x50fbe2 = null;
+  const _0x5b9313 = () => {
+    _0x50fbe2 = setTimeout(() => {
+      selectMode = true;
+      toggleRowSelected(_0x363720, _0x47ec50, true);
+      refreshSelectModeUI();
+    }, 500);
+  };
+  const _0x37dd18 = () => {
+    if (_0x50fbe2) {
+      clearTimeout(_0x50fbe2);
+      _0x50fbe2 = null;
+    }
+  };
+  _0x363720.addEventListener("pointerdown", _0x5b9313);
+  _0x363720.addEventListener("pointerup", _0x37dd18);
+  _0x363720.addEventListener("pointerleave", _0x37dd18);
+  _0x363720.addEventListener("contextmenu", _0x372cc1 => {
+    if (selectMode) {
+      _0x372cc1.preventDefault();
+    }
+  });
+  _0x363720.addEventListener("click", _0x2fc3f2 => {
+    if (!selectMode) {
+      return;
+    }
+    if (_0x2fc3f2.target.closest(".editBtn") || _0x2fc3f2.target.closest(".delBtn")) {
+      return;
+    }
+    _0x2fc3f2.preventDefault();
+    toggleRowSelected(_0x363720, _0x47ec50, !selectedProductIds.has(_0x47ec50));
+  });
+  _0x363720.querySelector(".row-select-check").addEventListener("click", _0x4982af => {
+    _0x4982af.stopPropagation();
+    toggleRowSelected(_0x363720, _0x47ec50, _0x4982af.target.checked);
+  });
+}
+function toggleRowSelected(_0x29444a, _0x597542, _0x12c0d2) {
+  if (_0x12c0d2) {
+    selectedProductIds.add(_0x597542);
+  } else {
+    selectedProductIds.delete(_0x597542);
+  }
+  _0x29444a.classList.toggle("selected", _0x12c0d2);
+  const _0x48db97 = _0x29444a.querySelector(".row-select-check");
+  if (_0x48db97) {
+    _0x48db97.checked = _0x12c0d2;
+  }
+  updateBulkBar();
+}
+function refreshSelectModeUI() {
+  document.querySelectorAll(".row-select-check").forEach(_0x1cd17c => _0x1cd17c.classList.toggle("hidden", !selectMode));
+  updateBulkBar();
+}
+function exitSelectMode() {
+  selectMode = false;
+  selectedProductIds.clear();
+  document.querySelectorAll(".product-row.selected").forEach(_0x316b81 => _0x316b81.classList.remove("selected"));
+  refreshSelectModeUI();
+}
+function updateBulkBar() {
+  const _0x4750f3 = document.getElementById("bulkActionBar");
+  const _0x1f44d5 = document.getElementById("bulkSelectedCount");
+  if (!_0x4750f3) {
+    return;
+  }
+  if (selectMode && selectedProductIds.size > 0) {
+    _0x4750f3.classList.remove("hidden");
+    if (_0x1f44d5) {
+      _0x1f44d5.textContent = selectedProductIds.size;
+    }
+  } else {
+    _0x4750f3.classList.add("hidden");
+  }
+}
+const bulkApplyBtn = document.getElementById("bulkApplyCategoryBtn");
+const bulkCancelBtn = document.getElementById("bulkCancelSelectBtn");
+if (bulkApplyBtn) {
+  bulkApplyBtn.addEventListener("click", async () => {
+    const _0x1e9a4a = document.getElementById("bulkMainCategory").value;
+    if (!_0x1e9a4a) {
+      alert("একটি ক্যাটাগরি বাছাই করুন।");
+      return;
+    }
+    if (!selectedProductIds.size) {
+      return;
+    }
+    bulkApplyBtn.disabled = true;
+    bulkApplyBtn.textContent = "প্রয়োগ করা হচ্ছে...";
+    try {
+      const _0x12dc51 = db.batch();
+      selectedProductIds.forEach(_0x578310 => {
+        _0x12dc51.update(db.collection("products").doc(_0x578310), {
+          mainCategory: _0x1e9a4a,
+          updatedAt: Date.now()
+        });
+      });
+      await _0x12dc51.commit();
+      exitSelectMode();
+      await loadProducts();
+    } catch (_0x4b6513) {
+      alert("বাল্ক আপডেট করা যায়নি: " + _0x4b6513.message);
+    }
+    bulkApplyBtn.disabled = false;
+    bulkApplyBtn.textContent = "নির্বাচিতগুলোতে প্রয়োগ করুন";
+  });
+}
+if (bulkCancelBtn) {
+  bulkCancelBtn.addEventListener("click", exitSelectMode);
+}
+function editProduct(_0xbd9d1, _0x5cd9cb) {
+  editingId = _0xbd9d1;
+  document.getElementById("editId").value = _0xbd9d1;
+  document.getElementById("fName").value = _0x5cd9cb.name || "";
+  document.getElementById("fMainCategory").value = _0x5cd9cb.mainCategory || "";
+  document.getElementById("fCategory").value = _0x5cd9cb.category || "";
+  document.getElementById("fPrice").value = _0x5cd9cb.price || "";
+  document.getElementById("fOldPrice").value = _0x5cd9cb.oldPrice || "";
+  document.getElementById("fStock").value = _0x5cd9cb.stock === 0 || _0x5cd9cb.stock ? _0x5cd9cb.stock : "";
+  document.getElementById("fCostPrice").value = _0x5cd9cb.costPrice === 0 || _0x5cd9cb.costPrice ? _0x5cd9cb.costPrice : "";
+  document.getElementById("fImage").value = "";
+  productImages = _0x5cd9cb.images && _0x5cd9cb.images.length ? [..._0x5cd9cb.images] : _0x5cd9cb.image ? [_0x5cd9cb.image] : [];
+  renderImageThumbs();
+  productVideo = _0x5cd9cb.videoUrl || "";
+  fVideoUrl.value = "";
+  videoUploadStatus.textContent = "";
+  renderVideoPreview();
+  document.getElementById("fDesc").value = _0x5cd9cb.description || "";
+  document.getElementById("fSizes").value = (_0x5cd9cb.sizes || []).join(", ");
+  document.getElementById("fBrand").value = _0x5cd9cb.brand || "";
+  document.getElementById("fFreeDelivery").checked = !!_0x5cd9cb.freeDelivery;
+  document.getElementById("fFlash").checked = !!_0x5cd9cb.flash;
+  document.getElementById("fFlashPrice").value = _0x5cd9cb.flashPrice || "";
+  formTitle.textContent = "প্রোডাক্ট এডিট করুন";
+  cancelEditBtn.classList.remove("hidden");
+  document.querySelector("[data-tab=\"products\"]").click();
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+async function deleteProduct(_0x15c002) {
+  if (!confirm("আপনি কি নিশ্চিত এই প্রোডাক্টটি ডিলিট করতে চান?")) {
+    return;
+  }
+  await db.collection("products").doc(_0x15c002).delete();
+  loadProducts();
+}
+const pickCoverBtn = document.getElementById("pickCoverBtn");
+const coverImageFile = document.getElementById("coverImageFile");
+const coverUploadStatus = document.getElementById("coverUploadStatus");
+const coverPreview = document.getElementById("coverPreview");
+const sCoverImage = document.getElementById("sCoverImage");
+const pickLogoBtn = document.getElementById("pickLogoBtn");
+const logoImageFile = document.getElementById("logoImageFile");
+const logoUploadStatus = document.getElementById("logoUploadStatus");
+const logoPreview = document.getElementById("logoPreview");
+const sLogoImage = document.getElementById("sLogoImage");
+pickCoverBtn.addEventListener("click", () => coverImageFile.click());
+coverImageFile.addEventListener("change", async () => {
+  const _0x598fe1 = coverImageFile.files[0];
+  if (!_0x598fe1) {
+    return;
+  }
+  const {
+    url: _0x292dda
+  } = await uploadToImgbb(_0x598fe1, coverUploadStatus);
+  if (_0x292dda) {
+    sCoverImage.value = _0x292dda;
+    coverPreview.src = _0x292dda;
+    coverPreview.style.display = "block";
+  }
+});
+pickLogoBtn.addEventListener("click", () => logoImageFile.click());
+logoImageFile.addEventListener("change", async () => {
+  const _0x1e6bf7 = logoImageFile.files[0];
+  if (!_0x1e6bf7) {
+    return;
+  }
+  const {
+    url: _0x49c94d
+  } = await uploadToImgbb(_0x1e6bf7, logoUploadStatus);
+  if (_0x49c94d) {
+    sLogoImage.value = _0x49c94d;
+    logoPreview.src = _0x49c94d;
+    logoPreview.style.display = "block";
+  }
+});
+const editCoverBtn = document.getElementById("editCoverBtn");
+editCoverBtn.addEventListener("click", () => {
+  if (!sCoverImage.value) {
+    alert("আগে একটা কভার ছবি বাছুন বা আপলোড করুন।");
+    return;
+  }
+  openImageEditor(sCoverImage.value, _0x2041a3 => {
+    sCoverImage.value = _0x2041a3;
+    coverPreview.src = _0x2041a3;
+    coverPreview.style.display = "block";
+  });
+});
+const editLogoBtn = document.getElementById("editLogoBtn");
+editLogoBtn.addEventListener("click", () => {
+  if (!sLogoImage.value) {
+    alert("আগে একটা লোগো বাছুন বা আপলোড করুন।");
+    return;
+  }
+  openImageEditor(sLogoImage.value, _0x4bcdd2 => {
+    sLogoImage.value = _0x4bcdd2;
+    logoPreview.src = _0x4bcdd2;
+    logoPreview.style.display = "block";
+  });
+});
+
+/* ===== ফ্ল্যাশ সেল সেটআপ (settings/flash) ===== */
+function flashToLocalInput(ms) {
+  const d = new Date(ms);
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes());
+}
+function flashShowStatus(cfg) {
+  const el = document.getElementById("flashStatus");
+  if (!el) return;
+  if (cfg && cfg.enabled && cfg.endAt > Date.now()) {
+    el.textContent = "✅ চলছে — শেষ হবে: " + new Date(cfg.endAt).toLocaleString("bn-BD");
+  } else if (cfg && cfg.enabled) {
+    el.textContent = "⌛ সময় শেষ হয়ে গেছে — নতুন সময় দিয়ে আবার সেভ করুন।";
+  } else {
+    el.textContent = "⏹ এখন বন্ধ আছে।";
+  }
+}
+async function loadFlashSettings() {
+  try {
+    const snap = await db.collection("settings").doc("flash").get();
+    const cfg = snap.exists ? snap.data() : null;
+    document.getElementById("flashEnabled").checked = !!(cfg && cfg.enabled);
+    document.getElementById("flashTitle").value = cfg && cfg.title ? cfg.title : "";
+    document.getElementById("flashEndAt").value = cfg && cfg.endAt ? flashToLocalInput(cfg.endAt) : "";
+    flashShowStatus(cfg);
+  } catch (e) {
+    console.warn("ফ্ল্যাশ সেল সেটিংস লোড হয়নি:", e.message);
+  }
+}
+async function saveFlashSettings(forceOff) {
+  const msg = document.getElementById("flashMsg");
+  const enabled = forceOff ? false : document.getElementById("flashEnabled").checked;
+  const endVal = document.getElementById("flashEndAt").value;
+  const endAt = endVal ? new Date(endVal).getTime() : 0;
+  if (enabled && (!endAt || endAt <= Date.now())) {
+    msg.textContent = "শেষ হওয়ার সময় এখনকার পরের একটা সময় দিন।";
+    msg.className = "msg error";
+    return;
+  }
+  const cfg = { enabled, endAt: endAt || 0, title: document.getElementById("flashTitle").value.trim(), updatedAt: Date.now() };
+  try {
+    await db.collection("settings").doc("flash").set(cfg);
+    document.getElementById("flashEnabled").checked = enabled;
+    msg.textContent = enabled ? "ফ্ল্যাশ সেল চালু হয়েছে ✅" : "ফ্ল্যাশ সেল বন্ধ করা হয়েছে ✅";
+    msg.className = "msg ok";
+    flashShowStatus(cfg);
+  } catch (e) {
+    msg.textContent = "সেভ হয়নি: " + e.message;
+    msg.className = "msg error";
+  }
+}
+document.getElementById("flashSaveBtn").addEventListener("click", () => saveFlashSettings(false));
+document.getElementById("flashStopBtn").addEventListener("click", () => saveFlashSettings(true));
+document.querySelectorAll(".flash-quick").forEach(b => b.addEventListener("click", () => {
+  document.getElementById("flashEndAt").value = flashToLocalInput(Date.now() + Number(b.dataset.hours) * 3600000);
+  document.getElementById("flashEnabled").checked = true;
+}));
+async function loadSettings() {
+  try {
+    const _0x5861f9 = await db.collection("settings").doc("main").get();
+    if (!_0x5861f9.exists) {
+      return;
+    }
+    const _0x3b5d93 = _0x5861f9.data();
+    if (_0x3b5d93.coverImage) {
+      sCoverImage.value = _0x3b5d93.coverImage;
+      coverPreview.src = _0x3b5d93.coverImage;
+      coverPreview.style.display = "block";
+    }
+    if (_0x3b5d93.logoImage) {
+      sLogoImage.value = _0x3b5d93.logoImage;
+      logoPreview.src = _0x3b5d93.logoImage;
+      logoPreview.style.display = "block";
+    }
+    document.getElementById("sHeroEyebrow").value = _0x3b5d93.heroEyebrow || "";
+    document.getElementById("sHeroTitle").value = _0x3b5d93.heroTitle || "";
+    document.getElementById("sHeroDesc").value = _0x3b5d93.heroDesc || "";
+    document.getElementById("sAddress").value = _0x3b5d93.address || "";
+    document.getElementById("sPhone").value = _0x3b5d93.phone || "";
+    document.getElementById("sWhatsapp").value = _0x3b5d93.whatsapp || "";
+    document.getElementById("sEmail").value = _0x3b5d93.email || "";
+    document.getElementById("sFacebookLink").value = _0x3b5d93.facebookLink || "";
+    document.getElementById("sMessengerId").value = _0x3b5d93.messengerId || "";
+    if (_0x3b5d93.primaryColor) {
+      document.getElementById("sPrimaryColor").value = _0x3b5d93.primaryColor;
+    }
+    if (_0x3b5d93.accentColor) {
+      document.getElementById("sAccentColor").value = _0x3b5d93.accentColor;
+    }
+    if (_0x3b5d93.backgroundColor) {
+      document.getElementById("sBackgroundColor").value = _0x3b5d93.backgroundColor;
+    }
+    if (_0x3b5d93.textColor) {
+      document.getElementById("sTextColor").value = _0x3b5d93.textColor;
+    }
+    if (_0x3b5d93.headerBg) {
+      document.getElementById("sHeaderBg").value = _0x3b5d93.headerBg;
+    }
+    if (_0x3b5d93.footerBg) {
+      document.getElementById("sFooterBg").value = _0x3b5d93.footerBg;
+    }
+    if (_0x3b5d93.fontFamily) {
+      document.getElementById("sFontFamily").value = _0x3b5d93.fontFamily;
+    }
+    document.getElementById("sShowHero").checked = _0x3b5d93.showHero !== false;
+    document.getElementById("sShowTrustBar").checked = _0x3b5d93.showTrustBar !== false;
+    document.getElementById("sShowAbout").checked = _0x3b5d93.showAbout !== false;
+    document.getElementById("sOfferBannerText").value = _0x3b5d93.offerBannerText || "";
+    mainCatList = Array.isArray(_0x3b5d93.mainCategories) && _0x3b5d93.mainCategories.length ? JSON.parse(JSON.stringify(_0x3b5d93.mainCategories)) : JSON.parse(JSON.stringify(DEFAULT_MAIN_CATEGORIES));
+    renderMainCatManager();
+    document.getElementById("sSiteName").value = _0x3b5d93.siteName || "";
+    const _0x31abec = {
+      sLogoSize: 42,
+      sContainerWidth: 1180,
+      sCardRadius: 12,
+      sBtnRadius: 40,
+      sHeroPad: 0,
+      sBodyFontSize: 15,
+      sProductNameSize: 13,
+      sPriceSize: 15,
+      sSectionTitleSize: 28
+    };
+    Object.keys(_0x31abec).forEach(_0xa59b3b => {
+      const _0x1c6d2c = document.getElementById(_0xa59b3b);
+      if (!_0x1c6d2c) {
+        return;
+      }
+      _0x1c6d2c.value = _0x3b5d93[_0xa59b3b] !== undefined && _0x3b5d93[_0xa59b3b] !== null && _0x3b5d93[_0xa59b3b] !== "" ? _0x3b5d93[_0xa59b3b] : _0x31abec[_0xa59b3b];
+      _0x1c6d2c.dispatchEvent(new Event("input"));
+    });
+    const _0x4058d0 = {
+      sBrandTagline: "brandTagline",
+      sSearchPlaceholder: "searchPlaceholder",
+      sNavProducts: "navProducts",
+      sNavCategories: "navCategories",
+      sNavAbout: "navAbout",
+      sNavContact: "navContact",
+      sTrustBar1: "trustBar1",
+      sTrustBar2: "trustBar2",
+      sTrustBar3: "trustBar3",
+      sProductsTitle: "productsTitle",
+      sProductsDesc: "productsDesc",
+      sEmptyStateText: "emptyStateText",
+      sAboutTitle: "aboutTitle",
+      sAbout1Title: "about1Title",
+      sAbout1Desc: "about1Desc",
+      sAbout2Title: "about2Title",
+      sAbout2Desc: "about2Desc",
+      sAbout3Title: "about3Title",
+      sAbout3Desc: "about3Desc",
+      sFooterTagline: "footerTagline",
+      sFooterContactTitle: "footerContactTitle",
+      sFooterHoursTitle: "footerHoursTitle",
+      sFooterHoursText: "footerHoursText",
+      sFooterHotline: "footerHotline",
+      sCopyrightText: "copyrightText",
+      sCartTitle: "cartTitle",
+      sCartNote: "cartNote",
+      sCheckoutBtnText: "checkoutBtnText",
+      sOrderConfirmTitle: "orderConfirmTitle",
+      sOrderConfirmDesc: "orderConfirmDesc",
+      sBnHome: "bnHome",
+      sBnCategories: "bnCategories",
+      sBnSearch: "bnSearch",
+      sBnCart: "bnCart",
+      sBnProfile: "bnProfile"
+    };
+    Object.keys(_0x4058d0).forEach(_0x3858b5 => {
+      const _0x442ac9 = document.getElementById(_0x3858b5);
+      if (_0x442ac9) {
+        _0x442ac9.value = _0x3b5d93[_0x4058d0[_0x3858b5]] || "";
+      }
+    });
+  } catch (_0x2a7ce4) {
+    console.warn(_0x2a7ce4.message);
+  }
+}
+document.getElementById("addMainCatBtn").addEventListener("click", () => {
+  const _0xbe0d28 = document.getElementById("newCatIcon");
+  const _0x3649c4 = document.getElementById("newCatLabel");
+  const _0x17cb82 = _0x3649c4.value.trim();
+  if (!_0x17cb82) {
+    alert("ক্যাটাগরির নাম লিখুন।");
+    return;
+  }
+  const _0x5bd524 = _0xbe0d28.value.trim() || "🛍️";
+  const _0x5a15e7 = slugifyCatValue(_0x17cb82, mainCatList.map(_0x29f840 => _0x29f840.value));
+  mainCatList.push({
+    value: _0x5a15e7,
+    label: _0x17cb82,
+    icon: _0x5bd524
+  });
+  _0xbe0d28.value = "";
+  _0x3649c4.value = "";
+  renderMainCatManager();
+});
+buildMainCategorySelect();
+document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+  const _0x102b71 = document.getElementById("settingsMsg");
+  const _0x9c98cb = mainCatList.filter(_0x46e2b8 => _0x46e2b8.label && _0x46e2b8.label.trim());
+  if (_0x9c98cb.length === 0) {
+    _0x102b71.textContent = "কমপক্ষে ১টা মেইন ক্যাটাগরি থাকতে হবে — খালি নাম দেওয়া ক্যাটাগরি বাদ দিয়ে আবার চেষ্টা করুন।";
+    _0x102b71.className = "msg error";
+    return;
+  }
+  const _0x72c220 = {
+    coverImage: sCoverImage.value.trim(),
+    logoImage: sLogoImage.value.trim(),
+    heroEyebrow: document.getElementById("sHeroEyebrow").value.trim(),
+    heroTitle: document.getElementById("sHeroTitle").value.trim(),
+    heroDesc: document.getElementById("sHeroDesc").value.trim(),
+    address: document.getElementById("sAddress").value.trim(),
+    phone: document.getElementById("sPhone").value.trim(),
+    whatsapp: document.getElementById("sWhatsapp").value.trim(),
+    email: document.getElementById("sEmail").value.trim(),
+    facebookLink: document.getElementById("sFacebookLink").value.trim(),
+    messengerId: document.getElementById("sMessengerId").value.trim().replace(/^https?:\/\/(www\.|m\.)?(facebook|fb)\.(com|me)\//i, "").replace(/\/.*/, ""),
+    primaryColor: document.getElementById("sPrimaryColor").value,
+    accentColor: document.getElementById("sAccentColor").value,
+    backgroundColor: document.getElementById("sBackgroundColor").value,
+    textColor: document.getElementById("sTextColor").value,
+    headerBg: document.getElementById("sHeaderBg").value,
+    footerBg: document.getElementById("sFooterBg").value,
+    fontFamily: document.getElementById("sFontFamily").value,
+    showHero: document.getElementById("sShowHero").checked,
+    showTrustBar: document.getElementById("sShowTrustBar").checked,
+    showAbout: document.getElementById("sShowAbout").checked,
+    mainCategories: _0x9c98cb,
+    offerBannerText: document.getElementById("sOfferBannerText").value.trim(),
+    siteName: document.getElementById("sSiteName").value.trim(),
+    sLogoSize: Number(document.getElementById("sLogoSize").value),
+    sContainerWidth: Number(document.getElementById("sContainerWidth").value),
+    sCardRadius: Number(document.getElementById("sCardRadius").value),
+    sBtnRadius: Number(document.getElementById("sBtnRadius").value),
+    sHeroPad: Number(document.getElementById("sHeroPad").value),
+    sBodyFontSize: Number(document.getElementById("sBodyFontSize").value),
+    sProductNameSize: Number(document.getElementById("sProductNameSize").value),
+    sPriceSize: Number(document.getElementById("sPriceSize").value),
+    sSectionTitleSize: Number(document.getElementById("sSectionTitleSize").value),
+    updatedAt: Date.now()
+  };
+  const _0x5c6c31 = {
+    sBrandTagline: "brandTagline",
+    sSearchPlaceholder: "searchPlaceholder",
+    sNavProducts: "navProducts",
+    sNavCategories: "navCategories",
+    sNavAbout: "navAbout",
+    sNavContact: "navContact",
+    sTrustBar1: "trustBar1",
+    sTrustBar2: "trustBar2",
+    sTrustBar3: "trustBar3",
+    sProductsTitle: "productsTitle",
+    sProductsDesc: "productsDesc",
+    sEmptyStateText: "emptyStateText",
+    sAboutTitle: "aboutTitle",
+    sAbout1Title: "about1Title",
+    sAbout1Desc: "about1Desc",
+    sAbout2Title: "about2Title",
+    sAbout2Desc: "about2Desc",
+    sAbout3Title: "about3Title",
+    sAbout3Desc: "about3Desc",
+    sFooterTagline: "footerTagline",
+    sFooterContactTitle: "footerContactTitle",
+    sFooterHoursTitle: "footerHoursTitle",
+    sFooterHoursText: "footerHoursText",
+    sFooterHotline: "footerHotline",
+    sCopyrightText: "copyrightText",
+    sCartTitle: "cartTitle",
+    sCartNote: "cartNote",
+    sCheckoutBtnText: "checkoutBtnText",
+    sOrderConfirmTitle: "orderConfirmTitle",
+    sOrderConfirmDesc: "orderConfirmDesc",
+    sBnHome: "bnHome",
+    sBnCategories: "bnCategories",
+    sBnSearch: "bnSearch",
+    sBnCart: "bnCart",
+    sBnProfile: "bnProfile"
+  };
+  Object.keys(_0x5c6c31).forEach(_0x5d4c5c => {
+    const _0x6b35c5 = document.getElementById(_0x5d4c5c);
+    if (_0x6b35c5) {
+      _0x72c220[_0x5c6c31[_0x5d4c5c]] = _0x6b35c5.value.trim();
+    }
+  });
+  try {
+    await db.collection("settings").doc("main").set(_0x72c220, {
+      merge: true
+    });
+    _0x102b71.textContent = "সেটিংস সেভ হয়েছে ✅ ওয়েবসাইট রিফ্রেশ দিলে পরিবর্তন দেখা যাবে।";
+    _0x102b71.className = "msg ok";
+  } catch (_0x49f069) {
+    _0x102b71.textContent = "ত্রুটি: " + _0x49f069.message;
+    _0x102b71.className = "msg error";
+  }
+});
+let allCoupons = [];
+let couponProductOptions = [];
+const couponForm = document.getElementById("couponForm");
+const editCouponIdEl = document.getElementById("editCouponId");
+const cancelCouponEditBtn = document.getElementById("cancelCouponEditBtn");
+const couponFormMsg = document.getElementById("couponFormMsg");
+async function loadProductOptionsForCoupon() {
+  const _0xa2b8ab = document.getElementById("cProductId");
+  if (!_0xa2b8ab) {
+    return;
+  }
+  try {
+    const _0x1e1350 = await db.collection("products").orderBy("updatedAt", "desc").get();
+    couponProductOptions = _0x1e1350.docs.map(_0x1feac2 => ({
+      id: _0x1feac2.id,
+      name: _0x1feac2.data().name || "(নামহীন)"
+    }));
+    const _0x4ea35d = _0xa2b8ab.value;
+    _0xa2b8ab.innerHTML = "<option value=\"\">সব প্রোডাক্টে চলবে (পুরো কার্টের উপর)</option>" + couponProductOptions.map(_0x31a5a6 => "<option value=\"" + _0x31a5a6.id + "\">" + _0x31a5a6.name + "</option>").join("");
+    if (_0x4ea35d) {
+      _0xa2b8ab.value = _0x4ea35d;
+    }
+  } catch (_0x3feb11) {
+    console.warn("প্রোডাক্ট তালিকা লোড করা যায়নি:", _0x3feb11.message);
+  }
+}
+function resetCouponForm() {
+  couponForm.reset();
+  document.getElementById("cActive").checked = true;
+  editCouponIdEl.value = "";
+  document.getElementById("saveCouponBtn").textContent = "কুপন সেভ করুন";
+  cancelCouponEditBtn.classList.add("hidden");
+  couponFormMsg.textContent = "";
+  document.getElementById("cTypeHint").textContent = "";
+  applyCouponTypeUX();
+}
+function defaultCouponLabel(_0x10ea21) {
+  if (_0x10ea21 === "free_delivery") {
+    return "ফ্রি ডেলিভারি অফার";
+  }
+  if (_0x10ea21 === "fixed") {
+    return "ফ্ল্যাট ছাড়";
+  }
+  return "পার্সেন্টেজ ছাড়";
+}
+function applyCouponTypeUX() {
+  const _0x19d892 = document.getElementById("cType");
+  const _0x2db920 = document.getElementById("cProductId");
+  const _0x4eeaea = document.getElementById("cValueWrap");
+  const _0x36505b = document.getElementById("cValue");
+  const _0x2499a4 = document.getElementById("cTypeHint");
+  if (!_0x19d892 || !_0x2db920) {
+    return;
+  }
+  if (_0x19d892.value === "fixed" && !_0x2db920.value) {
+    _0x19d892.value = "percent";
+    _0x2499a4.textContent = "সব প্রোডাক্টে \"নির্দিষ্ট টাকা\" ছাড় সব দামের প্রোডাক্টে সমানভাবে কাজ করে না, তাই এটা স্বয়ংক্রিয়ভাবে \"শতাংশ (%)\"-এ পাল্টে দেওয়া হয়েছে। একটা নির্দিষ্ট প্রোডাক্ট বাছলে চাইলে আবার টাকায় ফেরানো যাবে।";
+    _0x2499a4.className = "msg";
+  }
+  if (_0x19d892.value === "free_delivery") {
+    _0x4eeaea.style.display = "none";
+    _0x36505b.removeAttribute("required");
+  } else {
+    _0x4eeaea.style.display = "";
+    _0x36505b.setAttribute("required", "required");
+  }
+}
+document.getElementById("cType").addEventListener("change", applyCouponTypeUX);
+document.getElementById("cProductId").addEventListener("change", applyCouponTypeUX);
+applyCouponTypeUX();
+function couponRowHtml(_0x544d3f, _0x5b1893, _0x134ca8) {
+  const _0x1ce7a9 = _0x544d3f.expiry && _0x544d3f.expiry < _0x134ca8;
+  const _0x3cf7bb = _0x544d3f.maxUses && _0x5b1893 >= Number(_0x544d3f.maxUses);
+  const _0x1d6024 = [];
+  if (_0x544d3f.active === false) {
+    _0x1d6024.push("<span style=\"color:var(--danger);\">বন্ধ</span>");
+  } else if (_0x1ce7a9) {
+    _0x1d6024.push("<span style=\"color:var(--danger);\">মেয়াদ শেষ</span>");
+  } else if (_0x3cf7bb) {
+    _0x1d6024.push("<span style=\"color:var(--danger);\">সীমা শেষ</span>");
+  } else {
+    _0x1d6024.push("<span style=\"color:var(--success);\">সক্রিয়</span>");
+  }
+  const _0x36798e = _0x544d3f.type === "free_delivery" ? "🚚 ফ্রি ডেলিভারি" : _0x544d3f.type === "fixed" ? "৳" + _0x544d3f.value + " ছাড়" : _0x544d3f.value + "% ছাড়";
+  return "\n    <div class=\"info\">\n      <b>" + _0x544d3f.code + "</b>" + (_0x544d3f.label ? " — <i>" + _0x544d3f.label + "</i>" : "") + " — " + _0x36798e + " " + _0x1d6024.join(" • ") + "<br>\n      <span style=\"font-size:12px; color:var(--ink-soft);\">\n        " + (_0x544d3f.productId ? "🏷️ শুধু: " + (_0x544d3f.productName || "নির্দিষ্ট প্রোডাক্ট") + " • " : "সব প্রোডাক্টে • ") + "\n        " + (_0x544d3f.minOrder ? "সর্বনিম্ন অর্ডার ৳" + _0x544d3f.minOrder + " • " : "") + "\n        ব্যবহৃত: " + _0x5b1893 + (_0x544d3f.maxUses ? " / " + _0x544d3f.maxUses : "") + "\n        " + (_0x544d3f.expiry ? " • মেয়াদ: " + _0x544d3f.expiry : "") + "\n      </span>" + (_0x544d3f.appliedMsg ? "<br><span style=\"font-size:12px; color:var(--ink-soft);\">💬 কাস্টম মেসেজ: \"" + _0x544d3f.appliedMsg + "\"</span>" : "") + "\n    </div>\n    <div class=\"row-actions\">\n      <button type=\"button\" class=\"toggle-coupon-btn\" data-id=\"" + _0x544d3f._id + "\">" + (_0x544d3f.active === false ? "চালু করুন" : "বন্ধ করুন") + "</button>\n      <button type=\"button\" class=\"edit-coupon-btn\" data-id=\"" + _0x544d3f._id + "\">এডিট</button>\n      <button type=\"button\" class=\"delete-coupon-btn\" data-id=\"" + _0x544d3f._id + "\">ডিলিট</button>\n    </div>";
+}
+function wireCouponRowButtons(_0x3108ee) {
+  _0x3108ee.querySelectorAll(".edit-coupon-btn").forEach(_0x141275 => {
+    _0x141275.addEventListener("click", () => {
+      const _0x28f6d1 = allCoupons.find(_0x3f7acb => _0x3f7acb._id === _0x141275.dataset.id);
+      if (!_0x28f6d1) {
+        return;
+      }
+      document.querySelector(".ctab-btn[data-ctab=\"manage\"]").click();
+      editCouponIdEl.value = _0x28f6d1._id;
+      document.getElementById("cCode").value = _0x28f6d1.code || "";
+      document.getElementById("cLabel").value = _0x28f6d1.label || "";
+      document.getElementById("cAppliedMsg").value = _0x28f6d1.appliedMsg || "";
+      const _0xde2291 = document.getElementById("cProductId");
+      if (_0xde2291) {
+        _0xde2291.value = _0x28f6d1.productId || "";
+      }
+      document.getElementById("cType").value = _0x28f6d1.type || "percent";
+      document.getElementById("cValue").value = _0x28f6d1.value || "";
+      document.getElementById("cMinOrder").value = _0x28f6d1.minOrder || "";
+      document.getElementById("cMaxUses").value = _0x28f6d1.maxUses || "";
+      document.getElementById("cExpiry").value = _0x28f6d1.expiry || "";
+      document.getElementById("cActive").checked = _0x28f6d1.active !== false;
+      document.getElementById("cTypeHint").textContent = "";
+      applyCouponTypeUX();
+      document.getElementById("saveCouponBtn").textContent = "কুপন আপডেট করুন";
+      cancelCouponEditBtn.classList.remove("hidden");
+      window.scrollTo({
+        top: couponForm.offsetTop - 20,
+        behavior: "smooth"
+      });
+    });
+  });
+  _0x3108ee.querySelectorAll(".toggle-coupon-btn").forEach(_0x222b21 => {
+    _0x222b21.addEventListener("click", async () => {
+      const _0x487e5c = allCoupons.find(_0x31d4a8 => _0x31d4a8._id === _0x222b21.dataset.id);
+      if (!_0x487e5c) {
+        return;
+      }
+      _0x222b21.disabled = true;
+      try {
+        await db.collection("coupons").doc(_0x487e5c._id).update({
+          active: _0x487e5c.active === false
+        });
+        loadCouponsAdmin();
+      } catch (_0x2990b8) {
+        alert("ত্রুটি: " + _0x2990b8.message);
+        _0x222b21.disabled = false;
+      }
+    });
+  });
+  _0x3108ee.querySelectorAll(".delete-coupon-btn").forEach(_0x33460c => {
+    _0x33460c.addEventListener("click", async () => {
+      if (!confirm("এই কুপনটি ডিলিট করতে চান?")) {
+        return;
+      }
+      try {
+        await db.collection("coupons").doc(_0x33460c.dataset.id).delete();
+        loadCouponsAdmin();
+      } catch (_0x38a76d) {
+        alert("ত্রুটি: " + _0x38a76d.message);
+      }
+    });
+  });
+}
+async function loadCouponsAdmin() {
+  const _0x5e07f1 = document.getElementById("couponsAdminList");
+  const _0x116f54 = document.getElementById("freeDeliveryCouponsList");
+  try {
+    const _0x5a2212 = await db.collection("coupons").get();
+    allCoupons = _0x5a2212.docs.map(_0xfd9a3f => ({
+      _id: _0xfd9a3f.id,
+      ..._0xfd9a3f.data()
+    }));
+    document.getElementById("couponCountLabel").textContent = allCoupons.length;
+    if (typeof refreshFbExistingCouponOptions === "function") {
+      refreshFbExistingCouponOptions();
+    }
+    if (allCoupons.length === 0) {
+      _0x5e07f1.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখনো কোনো কুপন যোগ করা হয়নি।</p>";
+      if (_0x116f54) {
+        _0x116f54.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখনো কোনো ফ্রি ডেলিভারি অফার যোগ করা হয়নি।</p>";
+      }
+      return;
+    }
+    const _0x264c88 = await Promise.all(allCoupons.map(_0x22bd3c => db.collection("orders").where("couponCodes", "array-contains", (_0x22bd3c.code || "").toUpperCase()).get().then(_0x19cf3c => _0x19cf3c.size).catch(() => 0)));
+    // কাস্টমার-সাইডের কুপন-লিমিট এখন couponUsage কাউন্টার দেখে; অ্যাডমিন লিস্ট থেকে পাওয়া আসল সংখ্যার সাথে মিলিয়ে রাখা হয়
+    allCoupons.forEach((_cp, _ci) => {
+      const _code = (_cp.code || "").toUpperCase();
+      if (_code) {
+        db.collection("couponUsage").doc(_code).set({ count: _0x264c88[_ci] || 0 }).catch(() => {});
+      }
+    });
+    const _0x59135b = new Date().toISOString().slice(0, 10);
+    _0x5e07f1.innerHTML = "";
+    allCoupons.forEach((_0x1146b7, _0x21fcb9) => {
+      const _0x3a9dc8 = document.createElement("div");
+      _0x3a9dc8.className = "product-row";
+      _0x3a9dc8.innerHTML = couponRowHtml(_0x1146b7, _0x264c88[_0x21fcb9], _0x59135b);
+      _0x5e07f1.appendChild(_0x3a9dc8);
+    });
+    wireCouponRowButtons(_0x5e07f1);
+    if (_0x116f54) {
+      const _0x37c5b9 = allCoupons.map((_0x3de871, _0x10ba71) => ({
+        c: _0x3de871,
+        used: _0x264c88[_0x10ba71]
+      })).filter(_0x4beb27 => _0x4beb27.c.type === "free_delivery");
+      if (!_0x37c5b9.length) {
+        _0x116f54.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখনো কোনো ফ্রি ডেলিভারি অফার যোগ করা হয়নি — উপরের বাটনে চেপে একটা বানান।</p>";
+      } else {
+        _0x116f54.innerHTML = "";
+        _0x37c5b9.forEach(({
+          c: _0x857ccf,
+          used: _0x2715a6
+        }) => {
+          const _0x44abe6 = document.createElement("div");
+          _0x44abe6.className = "product-row";
+          _0x44abe6.innerHTML = couponRowHtml(_0x857ccf, _0x2715a6, _0x59135b);
+          _0x116f54.appendChild(_0x44abe6);
+        });
+        wireCouponRowButtons(_0x116f54);
+      }
+    }
+  } catch (_0x2e47d0) {
+    _0x5e07f1.innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _0x2e47d0.message + "</p>";
+  }
+}
+couponForm.addEventListener("submit", async _0x248bf2 => {
+  _0x248bf2.preventDefault();
+  applyCouponTypeUX();
+  const _0x333e54 = document.getElementById("cCode").value.trim().toUpperCase();
+  const _0x5587fd = document.getElementById("cType").value;
+  const _0x1f341a = _0x5587fd === "free_delivery" ? 0 : Number(document.getElementById("cValue").value);
+  if (!_0x333e54) {
+    couponFormMsg.textContent = "কোড দিতে হবে।";
+    couponFormMsg.className = "msg error";
+    return;
+  }
+  if (_0x5587fd !== "free_delivery" && !_0x1f341a) {
+    couponFormMsg.textContent = "ছাড়ের পরিমাণ দিতে হবে।";
+    couponFormMsg.className = "msg error";
+    return;
+  }
+  const _0x4440dd = document.getElementById("cProductId").value || null;
+  const _0x47f8cc = _0x4440dd ? couponProductOptions.find(_0x5d719f => _0x5d719f.id === _0x4440dd) : null;
+  const _0x59ba75 = document.getElementById("cLabel").value.trim() || defaultCouponLabel(_0x5587fd);
+  const _0x219034 = document.getElementById("cAppliedMsg").value.trim() || null;
+  const _0x6c9cc3 = {
+    code: _0x333e54,
+    label: _0x59ba75,
+    appliedMsg: _0x219034,
+    type: _0x5587fd,
+    value: _0x1f341a,
+    minOrder: document.getElementById("cMinOrder").value ? Number(document.getElementById("cMinOrder").value) : 0,
+    maxUses: document.getElementById("cMaxUses").value ? Number(document.getElementById("cMaxUses").value) : null,
+    expiry: document.getElementById("cExpiry").value || null,
+    active: document.getElementById("cActive").checked,
+    productId: _0x4440dd,
+    productName: _0x47f8cc ? _0x47f8cc.name : null,
+    updatedAt: Date.now()
+  };
+  const _0x1ea612 = editCouponIdEl.value;
+  try {
+    const _0x594a21 = allCoupons.find(_0x407564 => _0x407564.code === _0x333e54 && _0x407564._id !== _0x1ea612);
+    if (_0x594a21) {
+      couponFormMsg.textContent = "এই কোডে ইতিমধ্যে একটা কুপন আছে — অন্য কোড দিন অথবা ওটাই এডিট করুন।";
+      couponFormMsg.className = "msg error";
+      return;
+    }
+    if (_0x1ea612) {
+      await db.collection("coupons").doc(_0x1ea612).update(_0x6c9cc3);
+    } else {
+      _0x6c9cc3.createdAt = Date.now();
+      await db.collection("coupons").add(_0x6c9cc3);
+    }
+    couponFormMsg.textContent = "কুপন সেভ হয়েছে ✅";
+    couponFormMsg.className = "msg ok";
+    resetCouponForm();
+    loadCouponsAdmin();
+  } catch (_0x91d305) {
+    couponFormMsg.textContent = "ত্রুটি: " + _0x91d305.message;
+    couponFormMsg.className = "msg error";
+  }
+});
+cancelCouponEditBtn.addEventListener("click", resetCouponForm);
+async function loadSmartCouponSuggestion() {
+  const _0xec216 = document.getElementById("smartCouponBox");
+  if (!_0xec216) {
+    return;
+  }
+  _0xec216.innerHTML = "<p class=\"msg\">প্রোডাক্ট বিশ্লেষণ করা হচ্ছে...</p>";
+  try {
+    const _0x53300a = await db.collection("products").get();
+    const _0x5f0c9a = _0x53300a.docs.map(_0x396d5c => ({
+      id: _0x396d5c.id,
+      ..._0x396d5c.data()
+    }));
+    const _0x44c840 = _0x5f0c9a.filter(_0x2766c1 => _0x2766c1.costPrice !== undefined && _0x2766c1.costPrice !== null && _0x2766c1.costPrice !== "" && Number(_0x2766c1.costPrice) > 0);
+    if (_0x44c840.length === 0) {
+      _0xec216.innerHTML = "<p class=\"msg\">এখনো কোনো প্রোডাক্টে \"ক্রয়মূল্য\" দেওয়া নেই — তাই নিরাপদ ছাড় হিসাব করা যাচ্ছে না। প্রোডাক্ট ট্যাবে গিয়ে এডিট করে ক্রয়মূল্য যোগ করুন, তারপর আবার \"হিসাব করুন\" চাপুন।</p>";
+      return;
+    }
+    const _0x448322 = _0x44c840.map(_0x2d590e => {
+      const _0x5e2427 = Number(_0x2d590e.costPrice);
+      const _0x7344e4 = Number(_0x2d590e.price) || 0;
+      const _0x808f32 = _0x7344e4 - _0x5e2427;
+      const _0x1e1823 = _0x7344e4 > 0 ? _0x808f32 / _0x7344e4 * 100 : 0;
+      return {
+        ..._0x2d590e,
+        marginTk: _0x808f32,
+        marginPct: _0x1e1823
+      };
+    });
+    const _0x56b33c = _0x448322.filter(_0x2ce1ff => _0x2ce1ff.marginTk <= 0);
+    const _0x30a458 = _0x448322.filter(_0x462127 => _0x462127.marginTk > 0);
+    if (_0x30a458.length === 0) {
+      _0xec216.innerHTML = "<p class=\"msg error\">⚠️ যেসব প্রোডাক্টে ক্রয়মূল্য দেওয়া আছে, সবগুলোতেই ক্রয়মূল্য বিক্রয়মূল্যের সমান বা বেশি — তাই কোনো নিরাপদ ছাড় দেওয়ার সুযোগ নেই। আগে দাম ঠিক করুন।</p>";
+      return;
+    }
+    const _0x55e0ab = _0x30a458.reduce((_0x34f1bd, _0x22e90b) => _0x34f1bd + _0x22e90b.marginPct, 0) / _0x30a458.length;
+    const _0x222b98 = _0x30a458.reduce((_0x443c6d, _0x274356) => _0x274356.marginPct < _0x443c6d.marginPct ? _0x274356 : _0x443c6d, _0x30a458[0]);
+    const _0x4cc33e = Math.max(0, Math.floor(_0x222b98.marginPct * 0.7));
+    const _0x179bed = _0x30a458.filter(_0x5e0c80 => _0x5e0c80.stock !== undefined && _0x5e0c80.stock !== null && Number(_0x5e0c80.stock) > 5).sort((_0x13ce09, _0x32a6bb) => (_0x32a6bb.stock || 0) - (_0x13ce09.stock || 0)).slice(0, 5);
+    let _0x23df9b = "\n      <div style=\"font-size:13px; line-height:1.9;\">\n        📦 ক্রয়মূল্য দেওয়া প্রোডাক্ট: <b>" + _0x44c840.length + "</b> / " + _0x5f0c9a.length + "টি<br>\n        📊 গড় মার্জিন: <b>" + _0x55e0ab.toFixed(1) + "%</b><br>\n        ⚠️ সবচেয়ে কম মার্জিনের প্রোডাক্ট: <b>" + _0x222b98.name + "</b> (" + _0x222b98.marginPct.toFixed(1) + "%)\n      </div>\n      <div style=\"margin-top:10px; padding:12px; background:#eaf6ee; border-radius:10px; font-size:13px;\">\n        ✅ <b>নিরাপদ সর্বোচ্চ ছাড়: " + _0x4cc33e + "%</b><br>\n        <span style=\"color:#4a5a52;\">এর বেশি দিলে সবচেয়ে কম-মার্জিনের প্রোডাক্টে (\"" + _0x222b98.name + "\") লস হয়ে যেতে পারে — তাই ৭০% সেফটি বাফার রেখে হিসাব করা হয়েছে।</span>\n      </div>\n      " + (_0x56b33c.length ? "<p class=\"msg error\" style=\"margin-top:10px;\">⚠️ " + _0x56b33c.length + "টি প্রোডাক্টে ক্রয়মূল্য বিক্রয়মূল্যের সমান বা বেশি — এগুলোতে এমনিতেই ছাড় দিলে লস হবে। এই কুপন শুধু নির্দিষ্ট প্রোডাক্টে প্রযোজ্য না হয়ে পুরো কার্টে প্রযোজ্য হয়, তাই এই প্রোডাক্টগুলো কার্টে থাকলেও সাবধান থাকুন।</p>" : "") + "\n      " + (_0x4cc33e > 0 ? "<button type=\"button\" class=\"btn btn-outline\" id=\"useSuggestedCouponBtn\" data-percent=\"" + _0x4cc33e + "\" style=\"margin-top:12px;\">👉 এই ছাড় দিয়ে কুপন ফর্ম পূরণ করুন</button>" : "") + "\n    ";
+    if (_0x179bed.length) {
+      _0x23df9b += "\n        <div style=\"margin-top:16px;\">\n          <strong style=\"font-size:13px;\">📈 স্টকে বেশি পড়ে থাকা প্রোডাক্ট (এগুলোতে ছাড় দিলে দ্রুত বিক্রি হতে পারে):</strong>\n          <div style=\"margin-top:6px; font-size:12px; color:#66756f; line-height:1.8;\">\n            " + _0x179bed.map(_0x3f32ad => _0x3f32ad.name + " — স্টক " + _0x3f32ad.stock + "টি, মার্জিন " + _0x3f32ad.marginPct.toFixed(0) + "%").join("<br>") + "\n          </div>\n        </div>";
+    }
+    _0xec216.innerHTML = _0x23df9b;
+    const _0x4970c2 = document.getElementById("useSuggestedCouponBtn");
+    if (_0x4970c2) {
+      _0x4970c2.addEventListener("click", () => {
+        document.getElementById("cType").value = "percent";
+        document.getElementById("cValue").value = _0x4970c2.dataset.percent;
+        couponFormMsg.textContent = "সাজেস্ট করা ছাড় ফর্মে বসানো হয়েছে — এখন কোড ও অন্যান্য শর্ত দিয়ে সেভ করুন।";
+        couponFormMsg.className = "msg ok";
+        window.scrollTo({
+          top: couponForm.offsetTop - 20,
+          behavior: "smooth"
+        });
+      });
+    }
+  } catch (_0x62a973) {
+    _0xec216.innerHTML = "<p class=\"msg error\">সাজেশন লোড করা যায়নি: " + _0x62a973.message + "</p>";
+  }
+}
+const loadSmartCouponBtn = document.getElementById("loadSmartCouponBtn");
+if (loadSmartCouponBtn) {
+  loadSmartCouponBtn.addEventListener("click", loadSmartCouponSuggestion);
+}
+let fbToolProducts = [];
+function applyGenCouponTypeUX() {
+  const _0x3de3a1 = document.getElementById("genCouponType");
+  const _0x4dc86a = document.getElementById("genCouponValueWrap");
+  if (!_0x3de3a1 || !_0x4dc86a) {
+    return;
+  }
+  _0x4dc86a.style.display = _0x3de3a1.value === "free_delivery" ? "none" : "";
+}
+const genCouponTypeSel = document.getElementById("genCouponType");
+if (genCouponTypeSel) {
+  genCouponTypeSel.addEventListener("change", applyGenCouponTypeUX);
+}
+applyGenCouponTypeUX();
+async function loadFbToolProducts() {
+  const _0x16ae91 = document.getElementById("genCouponProductSelect");
+  const _0x477b9a = document.getElementById("fbProductSelect");
+  if (!_0x16ae91 && !_0x477b9a) {
+    return;
+  }
+  try {
+    const _0x7ed46d = await db.collection("products").orderBy("updatedAt", "desc").get();
+    fbToolProducts = _0x7ed46d.docs.map(_0x2c07fb => ({
+      id: _0x2c07fb.id,
+      ..._0x2c07fb.data()
+    }));
+    const _0x5105f0 = "<option value=\"\">-- প্রোডাক্ট বাছুন --</option>" + fbToolProducts.map(_0x53b34c => "<option value=\"" + _0x53b34c.id + "\">" + _0x53b34c.name + "</option>").join("");
+    if (_0x16ae91) {
+      const _0x52af70 = _0x16ae91.value;
+      _0x16ae91.innerHTML = _0x5105f0;
+      if (_0x52af70 && fbToolProducts.some(_0x1a08bd => _0x1a08bd.id === _0x52af70)) {
+        _0x16ae91.value = _0x52af70;
+      }
+    }
+    if (_0x477b9a) {
+      const _0x4fc61b = _0x477b9a.value;
+      _0x477b9a.innerHTML = _0x5105f0;
+      if (_0x4fc61b && fbToolProducts.some(_0x452ce9 => _0x452ce9.id === _0x4fc61b)) {
+        _0x477b9a.value = _0x4fc61b;
+      }
+    }
+  } catch (_0x2d2c73) {
+    console.error("fbToolProducts লোড এরর:", _0x2d2c73);
+  }
+}
+function suggestPercentForProduct(_0x502e57) {
+  if (_0x502e57.costPrice !== undefined && _0x502e57.costPrice !== null && _0x502e57.costPrice !== "" && Number(_0x502e57.costPrice) > 0) {
+    const _0x226d45 = Number(_0x502e57.costPrice);
+    const _0x56ca6e = Number(_0x502e57.price) || 0;
+    const _0x3e499c = _0x56ca6e > 0 ? (_0x56ca6e - _0x226d45) / _0x56ca6e * 100 : 0;
+    if (_0x3e499c > 0) {
+      return Math.max(5, Math.min(40, Math.floor(_0x3e499c * 0.7)));
+    }
+  }
+  return 10;
+}
+function generateCouponCodeForProduct(_0x26b7ac) {
+  const _0x323984 = document.getElementById("sSiteName");
+  let _0x295407 = (_0x323984 && _0x323984.value ? _0x323984.value : "SHOP").replace(/[^A-Za-z0-9]/g, "").slice(0, 4).toUpperCase();
+  if (!_0x295407) {
+    _0x295407 = "SHOP";
+  }
+  let _0x4cf454 = (_0x26b7ac.category || _0x26b7ac.mainCategory || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase();
+  if (!_0x4cf454) {
+    const _0x210877 = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    _0x4cf454 = _0x210877[Math.floor(Math.random() * _0x210877.length)] + _0x210877[Math.floor(Math.random() * _0x210877.length)];
+  }
+  const _0x4f0779 = Math.floor(1000 + Math.random() * 9000);
+  return "" + _0x295407 + _0x4cf454 + _0x4f0779;
+}
+function buildProductLink(_0x1267e8) {
+  const _0x2c7d0d = window.location.pathname.replace(/admin\.html$/i, "index.html");
+  return window.location.origin + _0x2c7d0d + "#product-" + _0x1267e8.id;
+}
+function buildFacebookCaption(_0x244024, _0x5470f3) {
+  const _0x237dc8 = mainCatList.find(_0x5d2cfe => _0x5d2cfe.value === _0x244024.mainCategory);
+  const _0x449364 = _0x237dc8 ? _0x237dc8.label : "";
+  const _0x1f9982 = _0x5470f3 && _0x5470f3.type === "free_delivery";
+  const _0xc49538 = [];
+  if (_0x1f9982) {
+    _0xc49538.push("ফ্রী ডেলিভারি! ফ্রী ডেলিভারি! অফার অফার! 🚚🔥");
+  } else {
+    const _0x411d26 = ["✨ নতুন কালেকশন এসেছে!", "🔥 সবার আগে দেখে নিন!", "💥 লিমিটেড স্টক — আজই অর্ডার করুন!", "🎁 চলছে স্পেশাল অফার!", "👑 ট্রেন্ডি লুক, সেরা দামে!"];
+    const _0xba6277 = _0x411d26[Math.floor(Math.random() * _0x411d26.length)];
+    _0xc49538.push("✨ " + _0xba6277 + " ✨");
+  }
+  _0xc49538.push("");
+  _0xc49538.push("✨ " + _0x244024.name + " ✨");
+  _0xc49538.push("");
+  if (_0x244024.description) {
+    const _0x1a40ba = _0x244024.description.length > 220 ? _0x244024.description.slice(0, 220).trim() + "..." : _0x244024.description;
+    _0xc49538.push(_0x1a40ba);
+    _0xc49538.push("");
+  }
+  const _0x2ae5d3 = [];
+  if (_0x449364 || _0x244024.category) {
+    _0x2ae5d3.push("📂 " + [_0x449364, _0x244024.category].filter(Boolean).join(" - "));
+  }
+  if (_0x244024.sizes && _0x244024.sizes.length) {
+    _0x2ae5d3.push("🎨 ভ্যারিয়েন্ট/সাইজঃ " + _0x244024.sizes.join(", "));
+  }
+  if (_0x2ae5d3.length) {
+    _0xc49538.push("🌸 প্যাকেজে যা যা থাকছে:");
+    _0x2ae5d3.forEach(_0x5c7657 => _0xc49538.push("✅ " + _0x5c7657));
+    _0xc49538.push("");
+  }
+  _0xc49538.push("🎉 বিশেষ অফার:");
+  let _0x367383 = "💰 মূল্যঃ মাত্র ৳" + _0x244024.price + " টাকা!";
+  if (_0x244024.oldPrice && Number(_0x244024.oldPrice) > Number(_0x244024.price)) {
+    const _0x1c1ab9 = Math.round((1 - Number(_0x244024.price) / Number(_0x244024.oldPrice)) * 100);
+    _0x367383 = "💰 মূল্যঃ ৳" + _0x244024.price + " (আগে ৳" + _0x244024.oldPrice + ") — " + _0x1c1ab9 + "% ছাড়! 🔥";
+  }
+  _0xc49538.push(_0x367383);
+  _0xc49538.push(_0x1f9982 ? "🚚 ডেলিভারিঃ সম্পূর্ণ ফ্রি ডেলিভারি! (ফ্রি হোম ডেলিভারি)" : "🚚 ডেলিভারিঃ সারাদেশে হোম ডেলিভারি সুবিধা");
+  _0xc49538.push("💵 পেমেন্টঃ ক্যাশ অন ডেলিভারি (পণ্য হাতে পেয়ে টাকা পরিশোধের সুবিধা)");
+  if (_0x5470f3 && !_0x1f9982) {
+    const _0x1705e5 = _0x5470f3.type === "percent" ? _0x5470f3.value + "%" : "৳" + _0x5470f3.value;
+    _0xc49538.push("🏷️ কুপন কোডঃ " + _0x5470f3.code + (_0x5470f3.label ? " (" + _0x5470f3.label + ")" : "") + " — অর্ডারে সাথে সাথে পাবেন " + _0x1705e5 + " ছাড়!");
+  } else if (_0x5470f3 && _0x1f9982) {
+    _0xc49538.push("🏷️ কুপন কোডঃ " + _0x5470f3.code + (_0x5470f3.label ? " (" + _0x5470f3.label + ")" : "") + " — চেকআউটে বসালেই ডেলিভারি চার্জ ফ্রি হয়ে যাবে!");
+  }
+  if (_0x244024.stock === 0) {
+    _0xc49538.push("");
+    _0xc49538.push("⚠️ সাময়িকভাবে স্টকে নেই — শীঘ্রই আসছে, নজর রাখুন!");
+  } else if (_0x244024.stock !== undefined && _0x244024.stock !== null && Number(_0x244024.stock) <= 5) {
+    _0xc49538.push("");
+    _0xc49538.push("⏳ মাত্র " + _0x244024.stock + "টি বাকি — তাড়াতাড়ি অর্ডার করুন!");
+  }
+  _0xc49538.push("");
+  _0xc49538.push("🛒 অর্ডার করতে এখনই ভিজিট করুন নিচে দেয়া লিংকে:");
+  _0xc49538.push("👉 অর্ডার করতে এখানে ক্লিক করুনঃ" + buildProductLink(_0x244024));
+  _0xc49538.push("");
+  _0xc49538.push("📞 সরাসরি কল বা ইনবক্স করুনঃ");
+  _0xc49538.push("অর্ডার করতে বা যেকোনো তথ্যের জন্য আমাদের পেজে মেসেজ দিন অথবা সরাসরি কল করুন।");
+  const _0x22e6b2 = document.getElementById("sWhatsapp");
+  if (_0x22e6b2 && _0x22e6b2.value.trim()) {
+    _0xc49538.push("📲 হোয়াটসঅ্যাপঃ " + _0x22e6b2.value.trim());
+  }
+  _0xc49538.push("");
+  _0xc49538.push("পছন্দের পণ্যটি স্টক শেষ হওয়ার আগেই দ্রুত বুক করুন! ❤️");
+  const _0x41edb2 = document.getElementById("sSiteName");
+  const _0x2028b2 = [];
+  if (_0x41edb2 && _0x41edb2.value.trim()) {
+    _0x2028b2.push("#" + _0x41edb2.value.trim().replace(/\s+/g, ""));
+  }
+  if (_0x449364) {
+    _0x2028b2.push("#" + _0x449364.replace(/\s+/g, ""));
+  }
+  if (_0x244024.category) {
+    _0x2028b2.push("#" + _0x244024.category.replace(/\s+/g, ""));
+  }
+  _0x2028b2.push("#অনলাইনশপিং", "#অফার");
+  _0xc49538.push("");
+  _0xc49538.push([...new Set(_0x2028b2)].join(" "));
+  return _0xc49538.join("\n");
+}
+async function runGenCoupon() {
+  const _0x301a1d = document.getElementById("genCouponProductSelect");
+  const _0xad7f43 = document.getElementById("genCouponMsg");
+  const _0xace570 = _0x301a1d.value;
+  if (!_0xace570) {
+    _0xad7f43.textContent = "আগে একটা প্রোডাক্ট বাছুন।";
+    _0xad7f43.className = "msg error";
+    return;
+  }
+  const _0x5432ae = fbToolProducts.find(_0x10f627 => _0x10f627.id === _0xace570);
+  if (!_0x5432ae) {
+    _0xad7f43.textContent = "প্রোডাক্টটি পাওয়া যায়নি, তালিকা রিফ্রেশ করে আবার চেষ্টা করুন।";
+    _0xad7f43.className = "msg error";
+    return;
+  }
+  const _0x3aeea3 = document.getElementById("genCouponBtn");
+  _0x3aeea3.disabled = true;
+  _0xad7f43.textContent = "তৈরি করা হচ্ছে...";
+  _0xad7f43.className = "msg";
+  try {
+    const _0x554cf8 = await db.collection("coupons").get();
+    const _0x1ef0c4 = _0x554cf8.docs.map(_0x25e7d3 => (_0x25e7d3.data().code || "").toUpperCase());
+    let _0x29d454 = generateCouponCodeForProduct(_0x5432ae);
+    let _0x5f5a44 = 0;
+    while (_0x1ef0c4.includes(_0x29d454) && _0x5f5a44 < 25) {
+      _0x29d454 = generateCouponCodeForProduct(_0x5432ae);
+      _0x5f5a44++;
+    }
+    const _0xc361d0 = document.getElementById("genCouponType").value;
+    const _0x151c0e = document.getElementById("genCouponValue").value;
+    const _0x2b266b = _0xc361d0 === "free_delivery" ? 0 : _0x151c0e ? Number(_0x151c0e) : suggestPercentForProduct(_0x5432ae);
+    const _0x108caf = document.getElementById("genCouponLabel").value.trim();
+    const _0x2c8748 = _0x108caf || defaultCouponLabel(_0xc361d0);
+    const _0x5ea64e = {
+      code: _0x29d454,
+      label: _0x2c8748,
+      type: _0xc361d0,
+      value: _0x2b266b,
+      minOrder: 0,
+      maxUses: null,
+      expiry: null,
+      active: true,
+      productId: _0x5432ae.id,
+      productName: _0x5432ae.name,
+      source: "fb-auto-tool",
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    await db.collection("coupons").add(_0x5ea64e);
+    document.getElementById("genCouponCodeOut").value = _0x29d454;
+    document.getElementById("genCouponResultBox").classList.remove("hidden");
+    _0xad7f43.textContent = "✅ কুপন \"" + _0x29d454 + "\" সেভ হয়ে গেছে (কুপন ম্যানেজমেন্ট তালিকায় দেখা যাবে)। এই কোডটা কাস্টমারকে কমেন্ট/ইনবক্সে সরাসরি বলুন — সাইটে এটা দেখানো হয় না।";
+    _0xad7f43.className = "msg ok";
+    loadCouponsAdmin();
+    loadProductOptionsForCoupon();
+  } catch (_0xb9442) {
+    _0xad7f43.textContent = "ত্রুটি: " + _0xb9442.message;
+    _0xad7f43.className = "msg error";
+  } finally {
+    _0x3aeea3.disabled = false;
+  }
+}
+const genCouponProductSelect = document.getElementById("genCouponProductSelect");
+if (genCouponProductSelect) {
+  genCouponProductSelect.addEventListener("change", () => {
+    const _0x39caa3 = fbToolProducts.find(_0x4e3e61 => _0x4e3e61.id === genCouponProductSelect.value);
+    const _0xf02bdc = document.getElementById("genCouponSuggestHint");
+    if (_0x39caa3) {
+      const _0xb23bb6 = suggestPercentForProduct(_0x39caa3);
+      document.getElementById("genCouponValue").value = _0xb23bb6;
+      document.getElementById("genCouponType").value = "percent";
+      applyGenCouponTypeUX();
+      _0xf02bdc.textContent = _0x39caa3.costPrice ? "প্রোডাক্টের ক্রয়মূল্য অনুযায়ী নিরাপদ ছাড় " + _0xb23bb6 + "% সাজেস্ট করা হয়েছে — চাইলে বদলে দিন।" : "ক্রয়মূল্য দেওয়া নেই, তাই ডিফল্ট " + _0xb23bb6 + "% ছাড় বসানো হয়েছে — চাইলে বদলে দিন।";
+    } else {
+      _0xf02bdc.textContent = "";
+    }
+    document.getElementById("genCouponResultBox").classList.add("hidden");
+    document.getElementById("genCouponMsg").textContent = "";
+  });
+}
+const genCouponBtn = document.getElementById("genCouponBtn");
+if (genCouponBtn) {
+  genCouponBtn.addEventListener("click", runGenCoupon);
+}
+function refreshFbExistingCouponOptions() {
+  const _0x39422d = document.getElementById("fbProductSelect");
+  const _0x8614fc = document.getElementById("fbExistingCouponSelect");
+  if (!_0x39422d || !_0x8614fc) {
+    return;
+  }
+  const _0x26d85b = _0x39422d.value;
+  const _0x1a99d5 = new Date().toISOString().slice(0, 10);
+  const _0x2daa70 = (typeof allCoupons !== "undefined" ? allCoupons : []).filter(_0x113db4 => _0x113db4.productId === _0x26d85b && _0x113db4.active !== false && (!_0x113db4.expiry || _0x113db4.expiry >= _0x1a99d5));
+  _0x8614fc.innerHTML = "<option value=\"\">-- কোনো কুপন ছাড়া --</option>" + _0x2daa70.map(_0xe5a7e6 => "<option value=\"" + _0xe5a7e6._id + "\">" + (_0xe5a7e6.label || _0xe5a7e6.code) + " (" + _0xe5a7e6.code + ")</option>").join("");
+}
+const fbProductSelect = document.getElementById("fbProductSelect");
+if (fbProductSelect) {
+  fbProductSelect.addEventListener("change", () => {
+    refreshFbExistingCouponOptions();
+    document.getElementById("fbResultBox").classList.add("hidden");
+    document.getElementById("fbGenMsg").textContent = "";
+  });
+}
+function runFbGenerateCaption() {
+  const _0x1a5c37 = document.getElementById("fbProductSelect");
+  const _0x49afb3 = document.getElementById("fbGenMsg");
+  const _0x2678b7 = _0x1a5c37.value;
+  if (!_0x2678b7) {
+    _0x49afb3.textContent = "আগে একটা প্রোডাক্ট বাছুন।";
+    _0x49afb3.className = "msg error";
+    return;
+  }
+  const _0x1404c9 = fbToolProducts.find(_0x3877c8 => _0x3877c8.id === _0x2678b7);
+  if (!_0x1404c9) {
+    _0x49afb3.textContent = "প্রোডাক্টটি পাওয়া যায়নি, তালিকা রিফ্রেশ করে আবার চেষ্টা করুন।";
+    _0x49afb3.className = "msg error";
+    return;
+  }
+  const _0x2ae5ad = document.getElementById("fbExistingCouponSelect");
+  const _0xfe04c0 = _0x2ae5ad ? _0x2ae5ad.value : "";
+  const _0x3a803a = _0xfe04c0 ? typeof allCoupons !== "undefined" ? allCoupons.find(_0x45be12 => _0x45be12._id === _0xfe04c0) : null : null;
+  const _0x5334e5 = buildFacebookCaption(_0x1404c9, _0x3a803a || null);
+  document.getElementById("fbCaptionOut").value = _0x5334e5;
+  document.getElementById("fbResultBox").classList.remove("hidden");
+  _0x49afb3.textContent = _0x3a803a ? "✅ ক্যাপশন তৈরি হয়ে গেছে (কুপনসহ) — নিচ থেকে কপি করুন।" : "✅ ক্যাপশন তৈরি হয়ে গেছে — নিচ থেকে কপি করুন।";
+  _0x49afb3.className = "msg ok";
+}
+const fbGenerateBtn = document.getElementById("fbGenerateBtn");
+if (fbGenerateBtn) {
+  fbGenerateBtn.addEventListener("click", runFbGenerateCaption);
+}
+async function copyTextToClipboard(_0x4040b3) {
+  try {
+    await navigator.clipboard.writeText(_0x4040b3);
+    return true;
+  } catch (_0x24192f) {
+    try {
+      const _0x370146 = document.createElement("textarea");
+      _0x370146.value = _0x4040b3;
+      _0x370146.style.position = "fixed";
+      _0x370146.style.opacity = "0";
+      document.body.appendChild(_0x370146);
+      _0x370146.focus();
+      _0x370146.select();
+      document.execCommand("copy");
+      document.body.removeChild(_0x370146);
+      return true;
+    } catch (_0x8b527d) {
+      return false;
+    }
+  }
+}
+const genCouponCopyBtn = document.getElementById("genCouponCopyBtn");
+if (genCouponCopyBtn) {
+  genCouponCopyBtn.addEventListener("click", async () => {
+    const _0x15ee7d = await copyTextToClipboard(document.getElementById("genCouponCodeOut").value);
+    const _0x410bf9 = document.getElementById("genCouponMsg");
+    _0x410bf9.textContent = _0x15ee7d ? "✅ কোড কপি হয়েছে!" : "কপি করা যায়নি, ম্যানুয়ালি সিলেক্ট করে কপি করুন।";
+    _0x410bf9.className = _0x15ee7d ? "msg ok" : "msg error";
+  });
+}
+const fbCopyCaptionBtn = document.getElementById("fbCopyCaptionBtn");
+if (fbCopyCaptionBtn) {
+  fbCopyCaptionBtn.addEventListener("click", async () => {
+    const _0x5a7689 = await copyTextToClipboard(document.getElementById("fbCaptionOut").value);
+    const _0x56e644 = document.getElementById("fbGenMsg");
+    _0x56e644.textContent = _0x5a7689 ? "✅ পুরো ক্যাপশন কপি হয়েছে — এখন ফেসবুকে গিয়ে পেস্ট করুন!" : "কপি করা যায়নি, ম্যানুয়ালি সিলেক্ট করে কপি করুন।";
+    _0x56e644.className = _0x5a7689 ? "msg ok" : "msg error";
+  });
+}
+let allReviewsAdmin = [];
+let reviewProductNameMap = {};
+async function loadReviewsAdmin() {
+  const _0x3c424f = document.getElementById("reviewsAdminList");
+  const _0x11ac4b = document.getElementById("reviewProductFilter");
+  try {
+    const [_0x1cbf3e, _0x474a32] = await Promise.all([db.collection("reviews").orderBy("ts", "desc").limit(500).get(), db.collection("products").get()]);
+    allReviewsAdmin = _0x1cbf3e.docs.map(_0x55d07d => ({
+      _id: _0x55d07d.id,
+      ..._0x55d07d.data()
+    }));
+    reviewProductNameMap = {};
+    _0x474a32.forEach(_0x3e25fc => {
+      reviewProductNameMap[_0x3e25fc.id] = _0x3e25fc.data().name;
+    });
+    document.getElementById("reviewCountLabel").textContent = allReviewsAdmin.length;
+    const _0x520794 = new Set();
+    let _0x5442ba = "<option value=\"all\">সব প্রোডাক্ট</option>";
+    allReviewsAdmin.forEach(_0x45764e => {
+      if (_0x45764e.productId && !_0x520794.has(_0x45764e.productId)) {
+        _0x520794.add(_0x45764e.productId);
+        _0x5442ba += "<option value=\"" + _0x45764e.productId + "\">" + (reviewProductNameMap[_0x45764e.productId] || _0x45764e.productId) + "</option>";
+      }
+    });
+    const _0x885107 = _0x11ac4b.value;
+    _0x11ac4b.innerHTML = _0x5442ba;
+    if ([..._0x520794, "all"].includes(_0x885107)) {
+      _0x11ac4b.value = _0x885107;
+    }
+    renderReviewsAdminList();
+  } catch (_0x4c6746) {
+    _0x3c424f.innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _0x4c6746.message + "</p>";
+  }
+}
+function renderReviewsAdminList() {
+  const _0x2fc24 = document.getElementById("reviewsAdminList");
+  const _0x571f84 = document.getElementById("reviewProductFilter");
+  const _0xf382d8 = _0x571f84 ? _0x571f84.value : "all";
+  let _0x10f163 = allReviewsAdmin;
+  if (_0xf382d8 && _0xf382d8 !== "all") {
+    _0x10f163 = _0x10f163.filter(_0x37a804 => _0x37a804.productId === _0xf382d8);
+  }
+  if (_0x10f163.length === 0) {
+    _0x2fc24.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এই ফিল্টারে কোনো রিভিউ নেই।</p>";
+    return;
+  }
+  _0x2fc24.innerHTML = "";
+  _0x10f163.forEach(_0x549082 => {
+    const _0x2b6531 = _0x549082.ts ? new Date(_0x549082.ts).toLocaleString("bn-BD") : "";
+    const _0x2e976c = document.createElement("div");
+    _0x2e976c.className = "lead-card";
+    _0x2e976c.innerHTML = "\n      <b>" + "★".repeat(_0x549082.rating || 0) + "☆".repeat(5 - (_0x549082.rating || 0)) + "</b> — " + escapeHtml(reviewProductNameMap[_0x549082.productId] || "অজানা প্রোডাক্ট") + "<br>\n      <span style=\"font-size:12px; color:var(--ink-soft);\">" + escapeHtml(_0x549082.name || "যাচাইকৃত ক্রেতা (নাম দেননি)") + " • " + _0x2b6531 + "</span>\n      " + (_0x549082.comment ? "<div class=\"items\">\"" + escapeHtml(_0x549082.comment) + "\"</div>" : "") + "\n      <div class=\"row-actions\" style=\"margin-top:8px;\"><button type=\"button\" class=\"delete-review-btn\" data-id=\"" + _0x549082._id + "\">ডিলিট</button></div>\n    ";
+    _0x2fc24.appendChild(_0x2e976c);
+  });
+  _0x2fc24.querySelectorAll(".delete-review-btn").forEach(_0x2cd9f3 => {
+    _0x2cd9f3.addEventListener("click", async () => {
+      if (!confirm("এই রিভিউটি ডিলিট করতে চান?")) {
+        return;
+      }
+      try {
+        await db.collection("reviews").doc(_0x2cd9f3.dataset.id).delete();
+        loadReviewsAdmin();
+      } catch (_0x546033) {
+        alert("ত্রুটি: " + _0x546033.message);
+      }
+    });
+  });
+}
+document.getElementById("reviewProductFilter").addEventListener("change", () => renderReviewsAdminList());
+async function loadAnalytics() {
+  try {
+    const _0xbf737 = new Date().toISOString().slice(0, 10);
+    const _0x5110d9 = await db.collection("events").limit(2000).get();
+    let _0x18917f = 0;
+    let _0x368e6f = 0;
+    let _0x2a1e93 = 0;
+    const _0x2151a0 = {};
+    _0x5110d9.forEach(_0x2c4fff => {
+      const _0x55fb3d = _0x2c4fff.data();
+      if (_0x55fb3d.type === "pageview") {
+        _0x368e6f++;
+        if (_0x55fb3d.day === _0xbf737) {
+          _0x18917f++;
+        }
+      } else if (_0x55fb3d.type === "product_view") {
+        _0x2a1e93++;
+        const _0x38a607 = _0x55fb3d.productName || _0x55fb3d.productId || "Unknown";
+        _0x2151a0[_0x38a607] = (_0x2151a0[_0x38a607] || 0) + 1;
+      }
+    });
+    document.getElementById("statTodayViews").textContent = _0x18917f;
+    document.getElementById("statTotalViews").textContent = _0x368e6f;
+    document.getElementById("statTotalProductViews").textContent = _0x2a1e93;
+    const _0x8fc343 = Object.entries(_0x2151a0).sort((_0x1e6715, _0x2d7250) => _0x2d7250[1] - _0x1e6715[1]).slice(0, 10);
+    const _0x36aa30 = document.getElementById("topProducts");
+    if (_0x8fc343.length === 0) {
+      _0x36aa30.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখনো কোনো ডেটা নেই — কাস্টমাররা সাইট ব্রাউজ করলে এখানে দেখা যাবে।</p>";
+    } else {
+      _0x36aa30.innerHTML = _0x8fc343.map(([_0x8d5469, _0x4e256c]) => "<div class=\"rank-row\"><span>" + _0x8d5469 + "</span><b>" + _0x4e256c + " বার দেখা হয়েছে</b></div>").join("");
+    }
+  } catch (_0x3da64d) {
+    document.getElementById("topProducts").innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _0x3da64d.message + "</p>";
+  }
+  loadLowStock();
+}
+async function loadLowStock() {
+  const _0x4373b2 = document.getElementById("lowStockList");
+  try {
+    const _0x496fc5 = await db.collection("products").get();
+    const _0x22dfb7 = [];
+    _0x496fc5.forEach(_0x48838b => {
+      const _0x574eb8 = _0x48838b.data();
+      if (_0x574eb8.stock !== undefined && _0x574eb8.stock !== null && _0x574eb8.stock <= 5) {
+        _0x22dfb7.push({
+          name: _0x574eb8.name,
+          stock: _0x574eb8.stock
+        });
+      }
+    });
+    _0x22dfb7.sort((_0x50fc84, _0x5d9cc0) => _0x50fc84.stock - _0x5d9cc0.stock);
+    if (_0x22dfb7.length === 0) {
+      _0x4373b2.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখন কোনো প্রোডাক্টে স্টক কম নেই (অথবা কোনো প্রোডাক্টে স্টক সংখ্যা সেট করা নেই)।</p>";
+    } else {
+      _0x4373b2.innerHTML = _0x22dfb7.map(_0x3c4f5c => "<div class=\"rank-row\"><span>" + _0x3c4f5c.name + "</span><b style=\"color:" + (_0x3c4f5c.stock === 0 ? "#B3261E" : "#B85C00") + ";\">" + (_0x3c4f5c.stock === 0 ? "স্টকে নেই" : _0x3c4f5c.stock + "টি বাকি") + "</b></div>").join("");
+    }
+  } catch (_0x2ec315) {
+    _0x4373b2.innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _0x2ec315.message + "</p>";
+  }
+}
+async function loadLeads() {
+  const _0x377466 = document.getElementById("leadsList");
+  try {
+    const _0x5df1f7 = await db.collection("orders").orderBy("ts", "desc").limit(500).get();
+    if (_0x5df1f7.empty) {
+      document.getElementById("statTotalLeads").textContent = "0";
+      _0x377466.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখনো কোনো অর্ডার আসেনি, তাই কোনো গ্রাহক তালিকাভুক্ত হয়নি।</p>";
+      return;
+    }
+    const _0x348aec = {};
+    _0x5df1f7.forEach(_0x5c9b84 => {
+      const _0x4eb604 = _0x5c9b84.data();
+      const _0x212cde = _0x4eb604.phone || "অজানা-" + _0x5c9b84.id;
+      if (!_0x348aec[_0x212cde]) {
+        _0x348aec[_0x212cde] = {
+          name: _0x4eb604.name,
+          phone: _0x4eb604.phone,
+          address: _0x4eb604.address,
+          orderCount: 0,
+          totalSpent: 0,
+          lastTs: _0x4eb604.ts,
+          firstTs: _0x4eb604.ts
+        };
+      }
+      const _0xaac1c2 = _0x348aec[_0x212cde];
+      _0xaac1c2.orderCount += 1;
+      _0xaac1c2.totalSpent += _0x4eb604.total ?? (_0x4eb604.subtotal || 0);
+      if (_0x4eb604.ts > _0xaac1c2.lastTs) {
+        _0xaac1c2.lastTs = _0x4eb604.ts;
+        _0xaac1c2.name = _0x4eb604.name || _0xaac1c2.name;
+        _0xaac1c2.address = _0x4eb604.address || _0xaac1c2.address;
+      }
+      if (_0x4eb604.ts < _0xaac1c2.firstTs) {
+        _0xaac1c2.firstTs = _0x4eb604.ts;
+      }
+    });
+    const _0xe02fed = Object.values(_0x348aec).sort((_0x45784f, _0x12cc7b) => _0x12cc7b.lastTs - _0x45784f.lastTs);
+    document.getElementById("statTotalLeads").textContent = _0xe02fed.length;
+    _0x377466.innerHTML = "";
+    _0xe02fed.forEach(_0x24a98c => {
+      const _0x5154b9 = document.createElement("div");
+      _0x5154b9.className = "lead-card";
+      const _0x582cf1 = new Date(_0x24a98c.lastTs).toLocaleString("bn-BD");
+      _0x5154b9.innerHTML = "\n        <b>" + escapeHtml(_0x24a98c.name || "নাম দেননি") + "</b> — <a href=\"tel:+" + escapeHtml((_0x24a98c.phone || "").replace(/\D/g, "")) + "\" style=\"color:inherit;\">" + escapeHtml(_0x24a98c.phone || "ফোন দেননি") + "</a><br>\n        <span style=\"font-size:12px; color:var(--ink-soft);\">📍 " + escapeHtml(_0x24a98c.address || "ঠিকানা দেননি") + "</span><br>\n        <span style=\"font-size:12px; color:var(--ink-soft);\">🛍️ মোট " + _0x24a98c.orderCount + " টা অর্ডার • সর্বমোট ৳" + _0x24a98c.totalSpent + " • শেষ অর্ডার: " + _0x582cf1 + "</span>\n      ";
+      _0x377466.appendChild(_0x5154b9);
+    });
+  } catch (_0xe3cb0c) {
+    _0x377466.innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _0xe3cb0c.message + "</p>";
+  }
+}
+async function loadVisitorLocations() {
+  const _el = document.getElementById("locationList");
+  try {
+    const [_locSnap, _conSnap] = await Promise.all([
+      db.collection("events").where("type", "==", "visitor_location").limit(1000).get(),
+      db.collection("events").where("type", "==", "visitor_contact").limit(1000).get()
+    ]);
+    const _locs = [];
+    const _contacts = [];
+    _locSnap.forEach(_d => _locs.push(_d.data()));
+    _conSnap.forEach(_d => _contacts.push(_d.data()));
+    _locs.sort((_a, _b) => (_b.ts || 0) - (_a.ts || 0));
+    _contacts.sort((_a, _b) => (_b.ts || 0) - (_a.ts || 0));
+    document.getElementById("locationCountLabel").textContent = _locs.length;
+    if (!_locs.length && !_contacts.length) {
+      _el.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">এখনো কেউ লোকেশন বা নাম/ফোন দেননি।</p>";
+      return;
+    }
+    // ভিজিটর আইডি ধরে সবচেয়ে নতুন নাম/ফোন
+    const _byVid = {};
+    _contacts.forEach(_c => {
+      if (_c.vid && !_byVid[_c.vid]) {
+        _byVid[_c.vid] = _c;
+      }
+    });
+    const _phoneHtml = _p => {
+      const _digits = String(_p || "").replace(/\D/g, "");
+      if (!_digits) {
+        return "";
+      }
+      const _wa = _digits.indexOf("01") === 0 ? "88" + _digits : _digits;
+      return "<a href=\"tel:" + _digits + "\" style=\"font-weight:700; color:var(--maroon);\">📞 " + escapeHtml(_p) + "</a> · <a href=\"https://wa.me/" + _wa + "\" target=\"_blank\" rel=\"noopener\" style=\"font-size:12px; color:#128c7e; font-weight:600;\">WhatsApp</a>";
+    };
+    _el.innerHTML = "";
+    const _seenVids = {};
+    _locs.forEach(_l => {
+      if (_l.vid) {
+        _seenVids[_l.vid] = true;
+      }
+      const _who = _l.name && _l.phone ? _l : _l.vid && _byVid[_l.vid] ? _byVid[_l.vid] : _l;
+      const _card = document.createElement("div");
+      _card.className = "lead-card";
+      const _when = _l.ts ? new Date(_l.ts).toLocaleString("bn-BD") : _l.day || "—";
+      const _contactLine = _who.name || _who.phone
+        ? "<div style=\"margin:4px 0;\">👤 <b>" + escapeHtml(_who.name || "নাম নেই") + "</b> &nbsp; " + _phoneHtml(_who.phone) + "</div>"
+        : "<div style=\"margin:4px 0; font-size:12px; color:var(--ink-soft);\">👤 নাম/ফোন দেননি</div>";
+      _card.innerHTML = "<b>" + _when + "</b><br>" + _contactLine +
+        "<span style=\"font-size:12px; color:var(--ink-soft);\">📍 " + escapeHtml(_l.address || "ঠিকানা পাওয়া যায়নি (শুধু কোঅর্ডিনেট আছে)") + "</span><br>" +
+        (_l.mapsUrl ? "<a href=\"" + encodeURI(_l.mapsUrl) + "\" target=\"_blank\" rel=\"noopener\" style=\"font-size:12px; color:var(--maroon); font-weight:600;\">🗺️ ম্যাপে দেখুন</a>" : "");
+      _el.appendChild(_card);
+    });
+    // যারা নাম/ফোন দিয়েছেন কিন্তু লোকেশন দেননি
+    const _seenPhones = {};
+    const _only = _contacts.filter(_c => {
+      if (_c.vid && _seenVids[_c.vid]) {
+        return false;
+      }
+      const _k = _c.phone || _c.vid || Math.random();
+      if (_seenPhones[_k]) {
+        return false;
+      }
+      _seenPhones[_k] = true;
+      return true;
+    });
+    if (_only.length) {
+      const _h = document.createElement("h3");
+      _h.style.cssText = "margin:18px 0 8px; font-size:15px;";
+      _h.textContent = "👤 নাম/ফোন দিয়েছেন, লোকেশন দেননি (" + _only.length + " জন)";
+      _el.appendChild(_h);
+      _only.forEach(_c => {
+        const _card = document.createElement("div");
+        _card.className = "lead-card";
+        const _when = _c.ts ? new Date(_c.ts).toLocaleString("bn-BD") : _c.day || "—";
+        _card.innerHTML = "<b>" + _when + "</b><br><div style=\"margin:4px 0;\">👤 <b>" + escapeHtml(_c.name || "নাম নেই") + "</b> &nbsp; " + _phoneHtml(_c.phone) + "</div>";
+        _el.appendChild(_card);
+      });
+    }
+  } catch (_e) {
+    _el.innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _e.message + "</p>";
+  }
+}
+const STATUS_LABELS_ADMIN = {
+  pending: "অপেক্ষমাণ",
+  confirmed: "নিশ্চিত হয়েছে",
+  processing: "প্রস্তুত হচ্ছে",
+  shipped: "পাঠানো হয়েছে",
+  delivered: "ডেলিভারি সম্পন্ন",
+  cancelled: "বাতিল হয়েছে"
+};
+let allOrders = [];
+let knownOrderIds = null;
+let unseenOrderCount = 0;
+const ordersTabBtn = document.querySelector(".tab-btn[data-tab=\"orders\"]");
+const ordersTabBaseLabel = ordersTabBtn ? ordersTabBtn.textContent : "";
+function playOrderChime() {
+  try {
+    const _0x416915 = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 1108].forEach((_0x597cbb, _0x227b40) => {
+      const _0x430c0d = _0x416915.createOscillator();
+      const _0x4a1c6b = _0x416915.createGain();
+      _0x430c0d.type = "sine";
+      _0x430c0d.frequency.value = _0x597cbb;
+      _0x4a1c6b.gain.setValueAtTime(0.001, _0x416915.currentTime);
+      _0x4a1c6b.gain.exponentialRampToValueAtTime(0.18, _0x416915.currentTime + _0x227b40 * 0.16 + 0.02);
+      _0x4a1c6b.gain.exponentialRampToValueAtTime(0.001, _0x416915.currentTime + _0x227b40 * 0.16 + 0.3);
+      _0x430c0d.connect(_0x4a1c6b).connect(_0x416915.destination);
+      _0x430c0d.start(_0x416915.currentTime + _0x227b40 * 0.16);
+      _0x430c0d.stop(_0x416915.currentTime + _0x227b40 * 0.16 + 0.32);
+    });
+  } catch (_0x3ecfdf) {}
+}
+function showAdminOrderToast(_0x4d5a4d) {
+  const _0x41e0a1 = (_0x4d5a4d.items || []).map(_0x1ea185 => "" + _0x1ea185.name + (_0x1ea185.size ? " (" + _0x1ea185.size + ")" : "") + " x" + _0x1ea185.qty).join(", ") || "—";
+  const _0xc68745 = document.createElement("div");
+  _0xc68745.className = "admin-order-toast";
+  _0xc68745.innerHTML = "\n    <button type=\"button\" class=\"aot-close\">×</button>\n    <div class=\"aot-icon\">🛒</div>\n    <div class=\"aot-body\">\n      <b>নতুন অর্ডার এসেছে! #" + escapeHtml(_0x4d5a4d.orderId || _0x4d5a4d._id) + "</b>\n      <div>👤 " + escapeHtml(_0x4d5a4d.name || "নাম দেননি") + "</div>\n      <div>📞 " + escapeHtml(_0x4d5a4d.phone || "—") + "</div>\n      <div>📍 " + escapeHtml(_0x4d5a4d.address || "—") + "</div>\n      <div>🛍️ " + _0x41e0a1 + "</div>\n      <div>💰 সাবটোটাল: ৳" + (_0x4d5a4d.subtotal || 0) + "</div>\n    </div>";
+  _0xc68745.querySelector(".aot-close").addEventListener("click", _0x4854e1 => {
+    _0x4854e1.stopPropagation();
+    _0xc68745.remove();
+  });
+  _0xc68745.addEventListener("click", () => {
+    ordersTabBtn.click();
+    _0xc68745.remove();
+  });
+  document.getElementById("adminToastHost").appendChild(_0xc68745);
+  setTimeout(() => _0xc68745.remove(), 15000);
+}
+function notifyNewOrder(_0x2568bc) {
+  playOrderChime();
+  showAdminOrderToast(_0x2568bc);
+  if ("Notification" in window && Notification.permission === "granted") {
+    const _0x4f94e3 = (_0x2568bc.items || []).map(_0x93335d => "" + _0x93335d.name + (_0x93335d.size ? " (" + _0x93335d.size + ")" : "") + " x" + _0x93335d.qty).join(", ") || "—";
+    try {
+      new Notification("Openshop — নতুন অর্ডার এসেছে", {
+        body: "#" + (_0x2568bc.orderId || _0x2568bc._id) + "\nনাম: " + (_0x2568bc.name || "নাম দেননি") + "\nফোন: " + (_0x2568bc.phone || "—") + "\nঠিকানা: " + (_0x2568bc.address || "—") + "\nআইটেম: " + _0x4f94e3 + "\nসাবটোটাল: ৳" + (_0x2568bc.subtotal || 0)
+      });
+    } catch (_0x1d1bb2) {}
+  }
+  unseenOrderCount++;
+  if (ordersTabBtn && !ordersTabBtn.classList.contains("active")) {
+    ordersTabBtn.textContent = ordersTabBaseLabel + " 🔴" + unseenOrderCount;
+  }
+  document.title = "(" + unseenOrderCount + ") Openshop অ্যাডমিন — নতুন অর্ডার!";
+}
+function clearOrderNotifications() {
+  unseenOrderCount = 0;
+  if (ordersTabBtn) {
+    ordersTabBtn.textContent = ordersTabBaseLabel;
+  }
+  document.title = "Openshop — অ্যাডমিন প্যানেল";
+}
+let ordersUnsubscribe = null;
+function startOrdersListener() {
+  if (ordersUnsubscribe) {
+    return;
+  }
+  const _0x224c75 = document.getElementById("ordersAdminList");
+  ordersUnsubscribe = db.collection("orders").orderBy("ts", "desc").limit(300).onSnapshot(_0x3cb8de => {
+    allOrders = _0x3cb8de.docs.map(_0x33c62e => ({
+      _id: _0x33c62e.id,
+      ..._0x33c62e.data()
+    }));
+    document.getElementById("orderCountLabel").textContent = allOrders.length;
+    renderOrderStats();
+    renderOrdersList();
+    const _0x424c57 = new Set(allOrders.map(_0x5982a8 => _0x5982a8._id));
+    if (knownOrderIds !== null) {
+      allOrders.forEach(_0x24ee56 => {
+        if (!knownOrderIds.has(_0x24ee56._id)) {
+          notifyNewOrder(_0x24ee56);
+        }
+      });
+    }
+    knownOrderIds = _0x424c57;
+  }, _0x5a7e2f => {
+    _0x224c75.innerHTML = "<p class=\"msg error\">লোড করা যায়নি: " + _0x5a7e2f.message + "</p>";
+  });
+}
+function csvEscape(_0x7fed18) {
+  const _0x1fc8b9 = String(_0x7fed18 === undefined || _0x7fed18 === null ? "" : _0x7fed18);
+  return "\"" + _0x1fc8b9.replace(/"/g, "\"\"") + "\"";
+}
+function exportOrdersToCSV() {
+  const _0xb96cc9 = document.getElementById("orderStatusFilter").value;
+  const _0x55877f = document.getElementById("orderSearchInput").value.trim().toLowerCase();
+  let _0x3c42be = allOrders;
+  if (_0xb96cc9 !== "all") {
+    _0x3c42be = _0x3c42be.filter(_0xa95aef => (_0xa95aef.status || "pending") === _0xb96cc9);
+  }
+  if (_0x55877f) {
+    _0x3c42be = _0x3c42be.filter(_0x5c9dbb => (_0x5c9dbb.orderId || "").toLowerCase().includes(_0x55877f) || (_0x5c9dbb.name || "").toLowerCase().includes(_0x55877f) || (_0x5c9dbb.phone || "").toLowerCase().includes(_0x55877f));
+  }
+  if (_0x3c42be.length === 0) {
+    alert("এক্সপোর্ট করার মতো কোনো অর্ডার নেই।");
+    return;
+  }
+  const _0xe082e5 = ["অর্ডার আইডি", "তারিখ", "নাম", "ফোন", "ঠিকানা", "প্রোডাক্ট", "সাবটোটাল", "ছাড়", "কুপন", "ডেলিভারি চার্জ", "সর্বমোট", "স্ট্যাটাস"];
+  const _0x2c8ce6 = _0x3c42be.map(_0xaaf8de => {
+    const _0x5925ef = (_0xaaf8de.items || []).map(_0x59c224 => "" + _0x59c224.name + (_0x59c224.size ? " (" + _0x59c224.size + ")" : "") + " x" + _0x59c224.qty).join(" | ");
+    return [_0xaaf8de.orderId || _0xaaf8de._id, new Date(_0xaaf8de.ts).toLocaleString("bn-BD"), _0xaaf8de.name || "", _0xaaf8de.phone || "", _0xaaf8de.address || "", _0x5925ef, _0xaaf8de.subtotal || 0, _0xaaf8de.discount || 0, _0xaaf8de.couponCode || "", _0xaaf8de.deliveryCharge ?? 0, _0xaaf8de.total ?? (_0xaaf8de.subtotal || 0), STATUS_LABELS_ADMIN[_0xaaf8de.status || "pending"] || _0xaaf8de.status].map(csvEscape).join(",");
+  });
+  const _0x253664 = "﻿" + [_0xe082e5.map(csvEscape).join(","), ..._0x2c8ce6].join("\n");
+  const _0x3cac3f = new Blob([_0x253664], {
+    type: "text/csv;charset=utf-8;"
+  });
+  const _0x5e1802 = URL.createObjectURL(_0x3cac3f);
+  const _0x160928 = document.createElement("a");
+  _0x160928.href = _0x5e1802;
+  _0x160928.download = "openshop-orders-" + new Date().toISOString().slice(0, 10) + ".csv";
+  _0x160928.click();
+  URL.revokeObjectURL(_0x5e1802);
+}
+const exportOrdersBtn = document.getElementById("exportOrdersBtn");
+if (exportOrdersBtn) {
+  exportOrdersBtn.addEventListener("click", exportOrdersToCSV);
+}
+function renderOrderStats() {
+  const _0x2b06b1 = {
+    pending: 0,
+    confirmed: 0,
+    processing: 0,
+    shipped: 0,
+    delivered: 0,
+    cancelled: 0
+  };
+  let _0x675f9a = 0;
+  allOrders.forEach(_0x249ecc => {
+    const _0x21bb9a = _0x249ecc.status || "pending";
+    if (_0x2b06b1[_0x21bb9a] !== undefined) {
+      _0x2b06b1[_0x21bb9a]++;
+    }
+    if (_0x21bb9a !== "cancelled") {
+      _0x675f9a += _0x249ecc.total ?? (_0x249ecc.subtotal || 0);
+    }
+  });
+  const _0x116de7 = document.getElementById("orderStatGrid");
+  _0x116de7.innerHTML = "\n    <div class=\"stat-box\"><div class=\"num\">" + allOrders.length + "</div><div class=\"lbl\">মোট অর্ডার</div></div>\n    <div class=\"stat-box\"><div class=\"num\">" + _0x2b06b1.pending + "</div><div class=\"lbl\">অপেক্ষমাণ</div></div>\n    <div class=\"stat-box\"><div class=\"num\">" + _0x2b06b1.delivered + "</div><div class=\"lbl\">ডেলিভারি সম্পন্ন</div></div>\n    <div class=\"stat-box\"><div class=\"num\">৳" + _0x675f9a.toLocaleString("en-BD") + "</div><div class=\"lbl\">সর্বমোট বিক্রয় মূল্য</div></div>\n  ";
+}
+function renderOrdersList() {
+  const _0x1a180f = document.getElementById("ordersAdminList");
+  const _0x465cc9 = document.getElementById("orderStatusFilter").value;
+  const _0x2a83e3 = document.getElementById("orderSearchInput").value.trim().toLowerCase();
+  let _0x313995 = allOrders;
+  if (_0x465cc9 !== "all") {
+    _0x313995 = _0x313995.filter(_0x543ab0 => (_0x543ab0.status || "pending") === _0x465cc9);
+  }
+  if (_0x2a83e3) {
+    _0x313995 = _0x313995.filter(_0x242705 => (_0x242705.orderId || "").toLowerCase().includes(_0x2a83e3) || (_0x242705.name || "").toLowerCase().includes(_0x2a83e3) || (_0x242705.phone || "").toLowerCase().includes(_0x2a83e3));
+  }
+  if (_0x313995.length === 0) {
+    _0x1a180f.innerHTML = "<p style=\"font-size:13px; color:var(--ink-soft);\">কোনো অর্ডার পাওয়া যায়নি।</p>";
+    return;
+  }
+  _0x1a180f.innerHTML = "";
+  _0x313995.forEach(_0x3b8559 => {
+    const _0x378248 = new Date(_0x3b8559.ts).toLocaleString("bn-BD");
+    const _0x9af33e = (_0x3b8559.items || []).map(_0x261b02 => "\n      <div class=\"order-item-row\">\n        <img src=\"" + escapeHtml(_0x261b02.image || "") + "\" alt=\"" + escapeHtml(_0x261b02.name) + "\" onerror=\"this.style.visibility='hidden'\">\n        <div class=\"order-item-info\">\n          <div class=\"oi-name\">" + escapeHtml(_0x261b02.name) + (_0x261b02.size ? " <span class=\"oi-size\">(" + escapeHtml(_0x261b02.size) + ")</span>" : "") + "</div>\n          <div class=\"oi-meta\">৳" + (_0x261b02.price || 0) + " × " + _0x261b02.qty + " = ৳" + (_0x261b02.price || 0) * (_0x261b02.qty || 0) + "</div>\n        </div>\n      </div>").join("") || "<p style=\"font-size:12px; color:var(--ink-soft);\">কোনো আইটেম পাওয়া যায়নি।</p>";
+    const _0xe2a178 = document.createElement("div");
+    _0xe2a178.className = "lead-card order-detail-card";
+    _0xe2a178.innerHTML = "\n      <div class=\"top-row\" style=\"margin-bottom:6px;\">\n        <b>#" + escapeHtml(_0x3b8559.orderId || _0x3b8559._id) + "</b>\n        <select data-id=\"" + escapeHtml(_0x3b8559._id) + "\" class=\"orderStatusSelect\">\n          " + Object.entries(STATUS_LABELS_ADMIN).map(([_0xf9be69, _0x1fc626]) => "<option value=\"" + _0xf9be69 + "\" " + ((_0x3b8559.status || "pending") === _0xf9be69 ? "selected" : "") + ">" + _0x1fc626 + "</option>").join("") + "\n        </select>\n      </div>\n      <div class=\"order-customer-info\">\n        <span>👤 " + escapeHtml(_0x3b8559.name || "নাম দেননি") + "</span>\n        <span>📞 <a href=\"tel:+" + escapeHtml((_0x3b8559.phone || "").replace(/\D/g, "")) + "\">" + escapeHtml(_0x3b8559.phone || "—") + "</a></span>\n        <span>📍 " + escapeHtml(_0x3b8559.address || "ঠিকানা দেননি") + "</span>\n        <span>🕒 " + _0x378248 + "</span>\n      </div>\n      <div class=\"order-items-block\">" + _0x9af33e + "</div>\n      <div class=\"order-total-row\">সাবটোটাল: ৳" + (_0x3b8559.subtotal || 0) + (_0x3b8559.discount ? " • ছাড়(" + escapeHtml(_0x3b8559.couponCode || "") + "): -৳" + _0x3b8559.discount : "") + " • ডেলিভারি: ৳" + (_0x3b8559.deliveryCharge ?? 0) + " • সর্বমোট: <b>৳" + (_0x3b8559.total ?? (_0x3b8559.subtotal || 0)) + "</b></div>\n    ";
+    _0xe2a178.querySelector(".orderStatusSelect").addEventListener("change", async _0x16008a => {
+      const _0x48e4cc = _0x16008a.target.value;
+      try {
+        await db.collection("orders").doc(_0x3b8559._id).update({
+          status: _0x48e4cc,
+          statusUpdatedAt: Date.now()
+        });
+        _0x3b8559.status = _0x48e4cc;
+        renderOrderStats();
+      } catch (_0xe4e656) {
+        alert("স্ট্যাটাস আপডেট করা যায়নি: " + _0xe4e656.message);
+      }
+    });
+    _0x1a180f.appendChild(_0xe2a178);
+  });
+}
+document.getElementById("orderStatusFilter").addEventListener("change", renderOrdersList);
+document.getElementById("orderSearchInput").addEventListener("input", renderOrdersList);
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
